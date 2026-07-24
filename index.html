@@ -240,15 +240,28 @@
   }
   .settings-list .settings-group-label:first-child{margin-top:0;}
   .settings-item{
-    display:flex; align-items:center; gap:9px;
+    display:flex; align-items:flex-start; gap:9px;
     padding:6px 4px; border-radius:6px; cursor:pointer;
     font-size:12.5px; color:var(--text-body);
   }
   .settings-item:hover{background:var(--bg-deep);}
   .settings-item input[type="checkbox"]{
     width:15px; height:15px; accent-color:var(--frs-red); cursor:pointer; flex-shrink:0;
+    margin-top:2px;
   }
+  .settings-item-label{ flex:1 1 auto; min-width:0; overflow-wrap:break-word; }
   .settings-item span.dim{color:var(--text-muted); font-size:10.5px; margin-left:auto; flex-shrink:0;}
+
+  .settings-backdrop{ display:none; position:fixed; inset:0; background:rgba(12,12,34,0.5); z-index:19; }
+  @media (max-width:640px){
+    .settings-backdrop.open{ display:block; }
+    .settings-panel{
+      position:fixed; top:50%; left:50%; right:auto;
+      transform:translate(-50%, -50%);
+      width:calc(100vw - 32px); max-width:340px;
+      max-height:calc(100vh - 64px); overflow-y:auto;
+    }
+  }
 
   .card.panel-hidden, .helgoland-card.panel-hidden, .helgoland-section.panel-hidden{display:none;}
 
@@ -419,7 +432,7 @@
     display:flex; flex-direction:column; gap:10px;
   }
   .precip-region{font-size:12.5px; font-weight:700; color:var(--text-primary); font-family:var(--display);}
-  .precip-place{font-size:10px; color:var(--text-muted); margin-top:-8px;}
+  .precip-place{font-size:10px; color:var(--text-muted); margin-top:4px;}
   .precip-bars{
     display:flex; gap:14px; align-items:flex-end; height:74px;
   }
@@ -519,6 +532,7 @@
           <button id="settingsToggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="settingsPanel">
             <span class="gear">⚙</span> Pegel ein-/ausblenden
           </button>
+          <div class="settings-backdrop" id="settingsBackdrop"></div>
           <div class="settings-panel" id="settingsPanel" role="menu">
             <h3>Anzeige</h3>
             <div class="settings-list" id="settingsList"><!-- Checkboxen werden per JS befüllt --></div>
@@ -661,6 +675,7 @@ const themeToggle = document.getElementById("themeToggle");
 const themeKnob = document.getElementById("themeKnob");
 const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
+const settingsBackdrop = document.getElementById("settingsBackdrop");
 const settingsList = document.getElementById("settingsList");
 const helgolandSection = document.getElementById("helgolandSection");
 
@@ -690,14 +705,14 @@ function buildSettingsPanel(){
     const item = document.createElement("label");
     item.className = "settings-item";
     const checked = visibility[s.id] !== false;
-    item.innerHTML = `<input type="checkbox" data-key="${s.id}" ${checked ? "checked" : ""}> ${s.label}`;
+    item.innerHTML = `<input type="checkbox" data-key="${s.id}" ${checked ? "checked" : ""}><span class="settings-item-label">${s.label}</span>`;
     settingsList.appendChild(item);
   });
 
   const havnebyItem = document.createElement("label");
   havnebyItem.className = "settings-item";
   const havnebyChecked = visibility["HAVNEBY"] !== false;
-  havnebyItem.innerHTML = `<input type="checkbox" data-key="HAVNEBY" ${havnebyChecked ? "checked" : ""}> Havneby (DK)`;
+  havnebyItem.innerHTML = `<input type="checkbox" data-key="HAVNEBY" ${havnebyChecked ? "checked" : ""}><span class="settings-item-label">Havneby (DK)</span>`;
   settingsList.appendChild(havnebyItem);
 
   const seaLabel = document.createElement("div");
@@ -708,7 +723,7 @@ function buildSettingsPanel(){
   const hgItem = document.createElement("label");
   hgItem.className = "settings-item";
   const hgChecked = visibility["HELGOLAND"] !== false;
-  hgItem.innerHTML = `<input type="checkbox" data-key="HELGOLAND" ${hgChecked ? "checked" : ""}> Wind &amp; Wellenhöhe Helgoland`;
+  hgItem.innerHTML = `<input type="checkbox" data-key="HELGOLAND" ${hgChecked ? "checked" : ""}><span class="settings-item-label">Wind &amp; Wellenhöhe Helgoland</span>`;
   settingsList.appendChild(hgItem);
 
   settingsList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -724,17 +739,20 @@ settingsToggle.addEventListener("click", (e) => {
   e.stopPropagation();
   const isOpen = settingsPanel.classList.toggle("open");
   settingsToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  settingsBackdrop.classList.toggle("open", isOpen);
 });
 document.addEventListener("click", (e) => {
   if(!settingsPanel.classList.contains("open")) return;
   if(settingsPanel.contains(e.target) || settingsToggle.contains(e.target)) return;
   settingsPanel.classList.remove("open");
   settingsToggle.setAttribute("aria-expanded", "false");
+  settingsBackdrop.classList.remove("open");
 });
 document.addEventListener("keydown", (e) => {
   if(e.key === "Escape" && settingsPanel.classList.contains("open")){
     settingsPanel.classList.remove("open");
     settingsToggle.setAttribute("aria-expanded", "false");
+    settingsBackdrop.classList.remove("open");
   }
 });
 
