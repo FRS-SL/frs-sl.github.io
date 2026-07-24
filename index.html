@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pegel Live — Rhein & Elbe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Aero (FRS-Hausschrift) ist kein Webfont; Poppins dient hier als optisch verwandter Ersatz
+     (breit, quadratisch-freundlicher Charakter). Roboto exakt gemäß Brand Guidelines. -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --display: 'Poppins', sans-serif;
+    --body: 'Roboto', sans-serif;
+
+    /* FRS brand palette (constant across themes) */
+    --frs-red: #f0140a;
+    --frs-red-dim: rgba(240,20,10,0.12);
+    --frs-dark-blue: #191955;
+    --frs-europe-blue: #003399;
+    --mid-blue: #326ec8;
+    --light-blue: #64aaf0;
+    --mid-green: #0f8c82;
+    --light-green: #00d7af;
+    --black: #000000;
+    --dark-grey: #787878;
+    --mid-grey: #cccccc;
+    --light-grey: #f0f0f0;
+    --white: #ffffff;
+  }
+
+  /* ---------- LIGHT THEME ---------- */
+  :root[data-theme="light"]{
+    --bg-deep: var(--light-grey);
+    --bg-page: var(--white);
+    --panel: var(--white);
+    --panel-line: var(--mid-grey);
+    --text-primary: var(--frs-dark-blue);
+    --text-body: #2a2a3a;
+    --text-muted: var(--dark-grey);
+    --heading: var(--frs-red);
+    --subheading: var(--frs-dark-blue);
+
+    --trend-up-bg: var(--frs-red-dim);
+    --trend-up-fg: var(--frs-red);
+    --trend-down-bg: rgba(15,140,130,0.12);
+    --trend-down-fg: var(--mid-green);
+    --trend-flat-fg: var(--dark-grey);
+
+    --chart-grid: #e2e2ea;
+    --chart-text: var(--dark-grey);
+    --chart-measured: var(--mid-blue);
+    --chart-area: rgba(50,110,200,0.10);
+    --chart-forecast: var(--mid-green);
+    --chart-threshold: var(--frs-red);
+    --chart-threshold2: #b8770a;
+    --chart-now-line: var(--frs-dark-blue);
+    --chart-now-dot: var(--frs-red);
+    --chart-hover-line: var(--frs-dark-blue);
+    --tooltip-bg: var(--white);
+    --tooltip-border: var(--mid-grey);
+
+    --gauge-band-a: #e9e9ee;
+    --gauge-band-b: var(--frs-dark-blue);
+    --gauge-frame: var(--panel-line);
+    --gauge-mw: var(--dark-grey);
+    --gauge-current: var(--frs-red);
+
+    --status-live: var(--mid-green);
+    --status-error: var(--frs-red);
+
+    --shadow: 0 1px 3px rgba(25,25,85,0.06);
+    --wave-a: var(--frs-red);
+    --wave-b: var(--frs-red);
+  }
+
+  /* ---------- DARK THEME ---------- */
+  :root[data-theme="dark"]{
+    --bg-deep: #0c0c22;
+    --bg-page: #0c0c22;
+    --panel: #15152f;
+    --panel-line: #2b2b52;
+    --text-primary: var(--light-grey);
+    --text-body: #d6d6e6;
+    --text-muted: #9a9ac0;
+    --heading: var(--frs-red);
+    --subheading: var(--light-blue);
+
+    --trend-up-bg: rgba(240,20,10,0.18);
+    --trend-up-fg: #ff5b50;
+    --trend-down-bg: rgba(0,215,175,0.14);
+    --trend-down-fg: var(--light-green);
+    --trend-flat-fg: #9a9ac0;
+
+    --chart-grid: #26264a;
+    --chart-text: #9a9ac0;
+    --chart-measured: var(--light-blue);
+    --chart-area: rgba(100,170,240,0.12);
+    --chart-forecast: var(--light-green);
+    --chart-threshold: #ff5b50;
+    --chart-threshold2: #e0a020;
+    --chart-now-line: var(--light-grey);
+    --chart-now-dot: #ff5b50;
+    --chart-hover-line: var(--light-grey);
+    --tooltip-bg: #0c0c22;
+    --tooltip-border: #2b2b52;
+
+    --gauge-band-a: #1f1f42;
+    --gauge-band-b: var(--light-blue);
+    --gauge-frame: #2b2b52;
+    --gauge-mw: #9a9ac0;
+    --gauge-current: #ff5b50;
+
+    --status-live: var(--light-green);
+    --status-error: #ff5b50;
+
+    --shadow: 0 1px 3px rgba(0,0,0,0.35);
+    --wave-a: var(--frs-red);
+    --wave-b: var(--frs-red);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg-deep);
+    color:var(--text-body);
+    font-family:var(--body);
+    min-height:100vh;
+    padding:32px 20px 60px;
+    transition:background .2s ease, color .2s ease;
+  }
+  .wrap{max-width:1320px;margin:0 auto;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:14px;
+    border-bottom:2px solid var(--frs-red);
+    padding-bottom:18px;
+    margin-bottom:28px;
+  }
+  .brand{display:flex; flex-direction:column; gap:6px;}
+  .brand-row{display:flex; align-items:center; gap:10px;}
+  .wave-mark{height:26px; width:auto; flex-shrink:0;}
+  .eyebrow{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--text-muted); font-weight:700; font-family:var(--body);
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:clamp(26px,4vw,36px);
+    margin:0;
+    letter-spacing:0.01em;
+    color:var(--heading);
+  }
+  .river-tag{font-size:12px; color:var(--text-muted);}
+  .status{
+    text-align:right;
+    font-size:12px;
+    color:var(--text-muted);
+    display:flex; flex-direction:column; gap:10px; align-items:flex-end;
+  }
+  .status-row{display:flex; align-items:center; gap:12px;}
+  .status .dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--status-live); margin-right:6px;
+    box-shadow:0 0 0 0 rgba(15,140,130,0.6);
+    animation:pulse 2.4s infinite;
+  }
+  .status.error .dot{background:var(--status-error); animation:none;}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(15,140,130,0.45);}
+    70%{box-shadow:0 0 0 8px rgba(15,140,130,0);}
+    100%{box-shadow:0 0 0 0 rgba(15,140,130,0);}
+  }
+  button#refreshBtn{
+    background:none; border:1px solid var(--panel-line); color:var(--text-primary);
+    font-family:var(--body); font-weight:500; font-size:11px; letter-spacing:0.04em;
+    padding:7px 12px; border-radius:20px 8px 20px 8px; cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  button#refreshBtn:hover{border-color:var(--frs-red); color:var(--frs-red);}
+  button#refreshBtn:focus-visible, a:focus-visible, #themeToggle:focus-visible{outline:2px solid var(--frs-red); outline-offset:2px;}
+
+  /* --- theme switch --- */
+  #themeToggle{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:999px; padding:4px; cursor:pointer;
+    font-family:var(--body); font-size:11px; color:var(--text-muted);
+  }
+  #themeToggle .track{
+    position:relative; width:42px; height:22px; border-radius:999px;
+    background:var(--light-grey);
+    transition:background .2s ease;
+  }
+  :root[data-theme="dark"] #themeToggle .track{background:#2b2b52;}
+  #themeToggle .knob{
+    position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%;
+    background:var(--frs-red); color:var(--white);
+    display:flex; align-items:center; justify-content:center; font-size:11px;
+    transition:left .2s ease, background .2s ease;
+  }
+  :root[data-theme="dark"] #themeToggle .knob{left:22px; background:var(--light-blue);}
+  #themeToggle .labels{display:flex; gap:6px; padding-right:4px;}
+
+  /* --- visibility settings menu --- */
+  .settings-wrap{position:relative;}
+  #settingsToggle{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--panel); border:1px solid var(--panel-line); color:var(--text-primary);
+    border-radius:20px 8px 20px 8px; padding:7px 12px; cursor:pointer;
+    font-family:var(--body); font-weight:500; font-size:11px; letter-spacing:0.04em;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  #settingsToggle:hover{border-color:var(--frs-red); color:var(--frs-red);}
+  #settingsToggle .gear{font-size:13px; line-height:1;}
+  .settings-panel{
+    position:absolute; top:calc(100% + 8px); right:0; z-index:20;
+    min-width:250px; max-width:calc(100vw - 24px);
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:10px 10px 10px 22px; box-shadow:0 8px 24px rgba(25,25,85,0.16);
+    padding:14px 16px 12px;
+    display:none;
+  }
+  :root[data-theme="dark"] .settings-panel{box-shadow:0 8px 24px rgba(0,0,0,0.5);}
+  .settings-panel.open{display:block;}
+  .settings-panel h3{
+    font-family:var(--display); font-size:12px; font-weight:700; letter-spacing:0.04em;
+    text-transform:uppercase; color:var(--heading); margin:0 0 10px;
+  }
+  .settings-list{display:flex; flex-direction:column; gap:2px; margin-bottom:4px;}
+  .settings-list .settings-group-label{
+    font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted);
+    margin:8px 0 2px; font-weight:500;
+  }
+  .settings-list .settings-group-label:first-child{margin-top:0;}
+  .settings-item{
+    display:flex; align-items:center; gap:9px;
+    padding:6px 4px; border-radius:6px; cursor:pointer;
+    font-size:12.5px; color:var(--text-body);
+  }
+  .settings-item:hover{background:var(--bg-deep);}
+  .settings-item input[type="checkbox"]{
+    width:15px; height:15px; accent-color:var(--frs-red); cursor:pointer; flex-shrink:0;
+  }
+  .settings-item span.dim{color:var(--text-muted); font-size:10.5px; margin-left:auto; flex-shrink:0;}
+
+  .card.panel-hidden, .helgoland-card.panel-hidden, .helgoland-section.panel-hidden{display:none;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  @media (max-width:980px){ .grid{grid-template-columns:1fr 1fr;} }
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr;}
+    /* größere Tippflächen auf Touchscreens (Empfehlung: min. 44px) */
+    button#refreshBtn, #settingsToggle{
+      min-height:44px; padding-top:12px; padding-bottom:12px;
+      display:inline-flex; align-items:center;
+    }
+    #themeToggle{ min-height:44px; padding-top:12px; padding-bottom:12px; }
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:10px 10px 10px 26px;
+    box-shadow:var(--shadow);
+    padding:22px 22px 18px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    transition:background .2s ease, border-color .2s ease;
+  }
+  .card .glow{
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--frs-red);
+  }
+  .card-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;}
+  .station-name{
+    margin:0;
+    font-family:var(--display); font-size:21px; font-weight:700; letter-spacing:0.01em;
+    color:var(--subheading);
+  }
+  .station-km{font-size:11px; color:var(--text-muted); font-family:var(--body);}
+  .water-name{font-size:11px; color:var(--text-muted); margin-bottom:14px;}
+
+  .value-row{
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:14px;
+  }
+  .value{
+    font-family:var(--display); font-weight:700; font-size:38px; line-height:1;
+    display:flex; align-items:baseline; gap:6px; color:var(--text-primary);
+  }
+  .value .unit{font-family:var(--body); font-weight:500; font-size:14px; color:var(--text-muted);}
+  .trend{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:500; padding:4px 10px; border-radius:20px;
+    width:fit-content;
+  }
+  .trend.up{color:var(--trend-up-fg); background:var(--trend-up-bg);}
+  .trend.down{color:var(--trend-down-fg); background:var(--trend-down-bg);}
+  .trend.flat{color:var(--trend-flat-fg); background:var(--light-grey);}
+  :root[data-theme="dark"] .trend.flat{background:#1f1f42;}
+
+  /* --- chart --- */
+  .chart-wrap{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    margin:6px 0 16px;
+    min-height:210px;
+    position:relative;
+  }
+  .chart-label-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:9.5px; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;
+    font-family:var(--body); font-weight:500;
+  }
+  .legend-dot{display:inline-block; width:9px; height:2px; background:var(--chart-measured); margin-right:4px; vertical-align:middle;}
+  .legend-dot.fc{background:none; border-top:2px dashed var(--chart-forecast); width:9px; height:0;}
+  .legend-dot.thresh{background:none; border-top:2px dashed var(--chart-threshold); width:9px; height:0;}
+  .legend-dot.thresh2{background:none; border-top:2px dashed var(--chart-threshold2); width:9px; height:0;}
+  .chart-svg{width:100%; height:200px; display:block; cursor:crosshair;}
+
+  .chart-tooltip{
+    position:absolute;
+    pointer-events:none;
+    background:var(--tooltip-bg);
+    border:1px solid var(--tooltip-border);
+    border-radius:6px;
+    padding:6px 10px;
+    font-size:11px;
+    line-height:1.5;
+    color:var(--text-primary);
+    white-space:nowrap;
+    opacity:0;
+    transition:opacity .1s ease;
+    z-index:5;
+    box-shadow:0 4px 14px rgba(0,0,0,0.18);
+  }
+  .chart-tooltip b{font-family:var(--display); font-size:13px;}
+
+  .foot-row{
+    display:flex; gap:16px; align-items:center;
+    border-top:1px solid var(--panel-line);
+    padding-top:14px;
+  }
+  .gauge-col{display:flex; flex-direction:column; align-items:center; gap:4px; width:40px; flex-shrink:0;}
+  .gauge-svg{width:26px; height:90px;}
+  .gauge-caption{font-size:7.5px; color:var(--text-muted); letter-spacing:0.05em; text-align:center; font-family:var(--body); font-weight:500;}
+
+  .meta-col{flex:1; font-size:11px; color:var(--text-muted); line-height:1.7;}
+  .meta-col b{color:var(--text-primary); font-weight:500;}
+  .meta-col .fc-line{color:var(--chart-forecast);}
+  .meta-col .thresh-line{color:var(--frs-red); font-weight:500;}
+
+  .skeleton{opacity:0.35;}
+  .err-msg{
+    color:var(--frs-red); font-size:12px; margin-top:8px; line-height:1.5;
+  }
+  .err-msg a{color:var(--mid-blue);}
+
+  .tide-events{
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid var(--panel-line);
+  }
+  .tide-events-label{
+    font-size:9.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted);
+    margin-bottom:8px; font-family:var(--body); font-weight:500;
+  }
+  .tide-events-list{display:flex; flex-direction:column; gap:6px;}
+  .tide-row{
+    display:flex; align-items:center; gap:10px;
+    font-size:12.5px; color:var(--text-body);
+  }
+  .tide-badge{
+    flex-shrink:0; width:28px; height:20px; border-radius:5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:700; font-size:10px;
+  }
+  .tide-badge.hw{background:rgba(50,110,200,0.15); color:var(--chart-measured);}
+  .tide-badge.nw{background:rgba(214,64,69,0.15); color:var(--frs-red);}
+  .tide-row .tide-time{color:var(--text-muted); min-width:108px;}
+  .tide-row .tide-value{margin-left:auto; font-weight:600;}
+  .tide-events-list .tide-empty{color:var(--text-muted); font-size:12px;}
+
+  .precip-section{ margin-top:34px; }
+  .precip-head{
+    border-top:1px solid var(--panel-line);
+    padding-top:22px;
+    margin-bottom:16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .precip-head h2{
+    font-family:var(--display); font-weight:700; font-size:20px; margin:0; color:var(--heading);
+  }
+  .precip-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:14px;
+  }
+  .precip-card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:10px 10px 10px 22px;
+    box-shadow:var(--shadow);
+    padding:14px 14px 12px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .precip-region{font-size:12.5px; font-weight:700; color:var(--text-primary); font-family:var(--display);}
+  .precip-place{font-size:10px; color:var(--text-muted); margin-top:-8px;}
+  .precip-bars{
+    display:flex; gap:14px; align-items:flex-end; height:74px;
+  }
+  .precip-bar-col{
+    display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;
+  }
+  .precip-bar-track{
+    display:flex; align-items:flex-end; height:52px; width:100%; justify-content:center;
+  }
+  .precip-bar{
+    width:16px; border-radius:3px 3px 1px 1px;
+    min-height:2px;
+    transition:height .2s ease;
+  }
+  .precip-bar-label{font-size:9px; color:var(--text-muted); letter-spacing:0.03em;}
+  .precip-bar-value{font-family:var(--body); font-weight:500; font-size:11px; color:var(--text-primary);}
+  .precip-note{font-size:10.5px; color:var(--text-muted); margin-top:2px; line-height:1.5;}
+
+  /* --- Helgoland wind & wave section --- */
+  .helgoland-section{ margin-top:34px; }
+  .helgoland-head{
+    border-top:1px solid var(--panel-line);
+    padding-top:22px;
+    margin-bottom:16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .helgoland-head h2{
+    font-family:var(--display); font-weight:700; font-size:20px; margin:0; color:var(--heading);
+  }
+  .helgoland-card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:10px 10px 10px 26px;
+    box-shadow:var(--shadow);
+    padding:22px 22px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .helgoland-card .glow{position:absolute; top:0; left:0; right:0; height:3px; background:var(--frs-red);}
+  .helgoland-stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+    gap:16px;
+    margin-bottom:18px;
+  }
+  .hg-stat-label{font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;}
+  .hg-stat-value{font-family:var(--display); font-weight:700; font-size:24px; color:var(--text-primary); display:flex; align-items:baseline; gap:5px;}
+  .hg-stat-value .unit{font-family:var(--body); font-weight:500; font-size:12px; color:var(--text-muted);}
+  .hg-meta{font-size:11px; color:var(--text-muted); margin-bottom:16px;}
+  .hg-charts{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+    border-top:1px solid var(--panel-line);
+    padding-top:16px;
+  }
+  @media (max-width:900px){ .hg-charts{grid-template-columns:1fr 1fr;} }
+  @media (max-width:640px){ .hg-charts{grid-template-columns:1fr;} }
+  .hg-chart-wrap{position:relative;}
+  .hg-chart-label{
+    font-size:9.5px; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;
+    font-family:var(--body); font-weight:500; text-transform:uppercase;
+    display:flex; align-items:center; gap:4px; flex-wrap:wrap;
+  }
+  .hg-chart-svg{width:100%; height:130px; display:block; cursor:crosshair;}
+  .hg-note{font-size:10.5px; color:var(--text-muted); margin-top:12px; line-height:1.5;}
+  .hg-err{color:var(--frs-red); font-size:12px; margin-top:8px; line-height:1.5;}
+
+  footer{
+    margin-top:30px; text-align:center; font-size:11px; color:var(--text-muted);
+    letter-spacing:0.02em;
+  }
+  footer a{color:var(--mid-blue); text-decoration:none;}
+  footer a:hover{text-decoration:underline;}
+
+  @media (prefers-reduced-motion: reduce){
+    .status .dot{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-row">
+        <img class="wave-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAADJCAYAAADVRcBNAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAIRiSURBVHhe7f15vD7PW9YH1kwyM2YSJ8kYYwwiAQREBIyAIIiKiDKIxg2DgChEURCNBFEMS9RRcCUMYlhUEDQGFwiCsgiuLBFQkVVAEA0YkklMTGYynVkzr/cv/f69rt91qp/lnPM55/N8vvXH9fTT1dXVVXdV31fddy09tjHGwsIz4H+1jfG/3sb4Z7cx/oVtjB+7jfGztjE+ahvjs7YxvmIb49u3Mf6v2xj/3TbG/2Mb43/axvh/bWP83/fwH9zG+NZtjK/ZxviPtzE+fhvjl2xj/OQ9vX9lG+OHb2P877Yx/rc7fL7PJh//zA7CROe3853xOgwQ1vfN4s3ST3R8YX7zOR2/056h4/bzj+Cz/Z8y7DzN7ul8LCwsPBB3AhYWnggodQj2X9rGeN9tjC/cxviBbYz/Yifs/9s2xv9nJ/D/7zbG/28b43/ewf//907w4J9uY/y3+/G/2cb4jm2MP7uN8UnbGL9wG+NttjH+j3vHAfzvtzH+NzvBQPbmCYKX4PjfeTbfSU6z6x32UJinJEdBPiHSx3quZWsZzDoImQ/vmckl43UaCwsLj4Q7AQsLTwSUO+T63tsY//lOyAACl7D5L6lzDjjnupDY6QSI/3EHnQII/nu2Mf7cNsaHbWP8+L0TAalL4BLNKcJpIp1Z9U28ee/RtU67n5txOuwUfF6HN4iTZenr59DPOSrHUfjCwsIj4U7AwsITAeX+f9jG+LTdsgZa3xwl9v9nuNpnhI4rftuvGYZFTzxAWsT5H/Zn4KL/9L0jodX+z+0WOwT/w/b/nd8EBKZlfA2ZZ5xOL0m9r89wSZwjzO7NfPp/Fq9xTX4vibewsHBP3AlYWHgioNwh9I/exvivdotaQoaEJWOI/IjMjWtHIMP6Op0CvQBY7rj2GXvHascl/y/vljvDAG11Col8ZtknYSU5NpE3qeW9M8zycQo+i86G+fS/sPNyadqZl1PosuW9XXbv6fgLCwv3xJ2AhYUnAsodt/dP3IkV1ziWtK52SRkSx0qX2LW8scJFkrjXM8xx+DwnDs9jct3Xb2P8hm2MN9mt9n8xSM/8SkA5zi5BNWnl9SSxvj4jtCbJfC7eg38+5gI4H2CGjgfoQFE2joAJg50G3grv58gznVCo98J8nytLy2ZWzo6/sLBwT9wJWFh4IqDgISkI5V/bxvjUnVwZA4doIV/IPa1tyfsIWuOAuLrqvaYrPq128F/v7vi/tY3xEdsY/8ZOeJBYEngT0IygT8Gx6rTyMy3/E851iRSShXwhYzwJzN7/V3e5vdE2xpttY/yEbYx32MZ4t321wPvsEwI/YBvjg7YxPngb41dtY3zIDv6DX7aN8Yv2IYifuY3xznsnCxn8qP05eC6oJ8nd4YYug3lPdL1b1lPXFxYW7oE7AQsLTwSVupYfJPXztzG+aXeLM+bdrvS0ypvcZ8SfVntfE15znJ1OxVduY3zoNsYb7xY7ZKp1mtbmNWQuiVteoFWsBc1z6Egkab/9NsbP2MZ4v22Mj9zG+A+2Mf7QNsYXbGN82TbG125j/J1tjO/cxvgH+0qBf7yN8UN7WRha+C/3/3hB/skO/gOHIfjP0AcTFL9rG+NvbmN89TbGn9jG+L9sY3zMNsYv38b4adsYP27Pm8MU5BmLXhmd82IY3lb7wsLCA3AnYGHhiaGlDhlAasxC/6KdXCXldpfn8VponXuuxc5/Z8dD7qxxp3PxW7Yx3nEnMAjXMXaPXRbDjshclzZlpbPwY/b06cwwnv87tjE+fxvjr2xjfPNOshIvXoT/fpcNYC4AyBn+ejguAZMJ9VIAw03H5/B8vBh0BOgYfN8+TPKntzE+YV/7/1a7jCiXspHY2yvBecrNa56nDLu9LCwsHOBOwMLCEyNJTxcz7t7/bCcwiVvi1aJmXL0t+ERb4o2j8fd02fN8CBNXPJvdvP+eN6xSyFirlLXsHCXrJG3HrrFmcZG/3TbGL96J8HO3Mb5ut4ixotlAh+dBqpJszhvIvDuPoOcTHHkwutze19cbPhvkxET+S/rkGw8BHZFfvY3xTtsY//pebmSFPACyOCJpwnN8fmFh4UrcCVhYeEK09aqFy1jxT9rG+JYg9LTSOaaF3lb3JZDYJG+JqtNJqxXSxb3NmnZc34w/v8s2xtvuRA+JAca0yT/uaToB7GCHixyLG5c41i5WLx0GPAKQIx0U/kOQPEtC73w3LiFl5dNluxR5b6820LLXquccd/+f3930jO3TkaGDQ922m52OUFvkem26vSwsLJzAnYCFhSdEErrnAHJnDBnChERxDUu8EsklRHYK3p/pSlxpEXMOiUG2dCIgrHRD/8PdOsWKZ9wZz8Lf3q1uxqNxmeMuh+x0cecmOR6FnYxzBHzKCs+ynELfc4S+D9gJSg9BLi+E5JHRd+/r/pmop7WewxU5tj5zuy8sLFyIOwELC08I3axa6Ia5PIsxWVzdWLJpsUIYTTDXEFTj6F5ICsu5wyV2d6nTQnVM2/FtwnNcnriScHoFzEOXxeV7R/l7KCRhXftCUp51GGb5NJwj91Ne5eM4PJ0ftvf9uftwBcSuR8ax9Sb1ZaUvLFyBOwELC08IFTjKnHFo/hPmx1SYhPZT961bGad1GZtW7BHZdPgp5D1NYmkxc57/ta4zrbRak6xnz2tcG+daHN3vuv8m9Hati+6IJLrcKS86OEzoY0Ld79+HJFwa2B92sXO3sLBwBe4ELCw8MXS36m6X4LnGuCvWHMu0cFs3oR4RS5PPjGSbLDNdSX0Wn/+SHeeZbsdJUjwi5aP7+7lH6PReBJRHP5P/mXflbRz/6+Wgs+BHd9iC9zfvXhjqG4vdDt2yzBcW7oE7AQsLTwzHzP3vWm/OUexYcT9nH4/VjSuRnCK0JPFEkpEklOdNWJ1uxu04s/vPhfUzyM8sT0fovD02fEZb7DO5mifLwH+HDSR7jqQFyeN1YUMhPnXrmnzagF+Pc6JkotvPwsLCjjsBCwtPDC3zhtcZT3/zfeJZjvVKKjPyOYcmxVME2dcbl8Y7hUzjvmn1/V2OGTqNc+j7Gx3/3D2QOpMe2cCGDXTSBS+xO2lSz00ivTtN/I1udwsLrxzuBCwsPDGOFLTXccWy7OlLd3dtu7KPiGTh5Yf1x2Y1rBB49yD1Ju9GknSTdyPb08LCK4s7AQsLzwCV7sySgtBZwsZnVpktjXV+rVt64eWEhE7nDEv97+770bMBTVrlTd7dRk6hyb2vLyy8MrgTsLDwTJDU25rCWmNi3Cfts6RZ/pVu2yaJhdsB9eecCI4sbftr+yY9DLXkzPe2zPv8CIvQF14zuBOwsPBMUGnnLHfAJDkJHQu913IvUr9dWHce2XiH1QyfsY3xIyez3ZOQzxH6OQI/dW1h4SZxJ2Bh4Rkx+yQnhM4OYyxdg9CdKS2ZL0K/XaSnxTkRkDorGvjcK+Pp+SEXSVoyb0K/xhK/NN7Cws3gTsDCwjNB6xykEif8R2xjfHntFLfc7rcP6y93xHPXvW/bxnibfQ5FtoUG4adI/gh5/8LCK4E7AQsLz4QkdJUy4Jzvb39vzG4HKP9e/7xwW7BzZj1K7C5nY4063pkm8Sb0DluEvvCaxJ2AhYVngjuFpWLmnBnPH7p/5CQ/mZp7rDdRLNwO0tMC3HgGK52P27A+nWEXt4fVe+OnVpuUtda7fTWWy33hlcOdgIWFZwKz2SHwVMiQ/I/axvji2FSGMVaV/7LQbx9N6FrskDpj6b9l/5wuu8hlh892IjHPLPM+72unri8s3BzuBCwsPDFQxFpbPSEO65zJUWw84nfDc+tX/i9Cv11I4LktrEeuYaV/xzbGW+xf36NNuJQNgj81dt7XZtcXoS+8UrgTsLDwxJDAJXSULF9b+5e3Md5030HMT5I6do6yx2JfFvptIy1ykasX6LCxjI2xdDw1rE0HthO9Og3d8k3oSeqL0BdeOdwJWFh4YqSiRRFjlYMfs43xmTuZ997tKv61Dv22cY7QvY535vfsHTwmyUHkHP3MLh6edsfPLHRBu1uEvvDK4U7AwsITQ6sK5Yr1JZl/bFjmKv8kAY6L0G8b2TmT0JPMrVs3nPn6bYxfva96YH9/SJ3xddoMLnnaT1viIMl9WegLryzuBCwsPCFS0ULqjIuybzvfyYbMUeKsS0ap42JPIpDQmyQWrkMT6LXo9K5FptXWuaBTx5HPrWKtf982xp/bxvj3tjF+wk7ukLrueOdkzNpb/l+EvvBK4U7AwsITAqWL8oXIUciQ+e/a1yC7ZztKHwuNo5ac4U9N6E00M0Lr60fxjuJ2nMYl8fM649B+cpalfnSMADJFxgKiFExGSxie8QFpmJ7PEPlFvM5fo8skuN+Jj5K9HTw6eyxl/J5tjD+6jfFL9z3g2V0OV/yM0MUi8oVXEncCFhZeAFSuWuKOd6J4tcr/zW2Mz9utsX9aSn3mik00QdwH59Ls/PQnXK9Fpi0heu4zMk7OGeiODcf+rCxH04UElatgSRirB/6LbYwf2Mb4/n3znu/avz0vIMy/v43xD7Yx/tE2xg/u99Dp4n6IlbTxqEj6EL1EbF6O6rFln+XMsLyXctnJoCx0OsjXX9/G+LC9PTG23m3Qz7JK6KdIf2Hh5nAnYGHhgYCscX1ieXc4BK5LlDg/fBvjjbYxfsX+6UzIAAXdxAZayTcpPBSdZsM4Od6bebokjQZpQH56Gjh3wxzzlUQmSTu3AEBmnvOfI2TNpiyQ81/exviSbYzP2cb4fdsYv20b48O3MT5oG+MXb2P8rG2Mn7aN8c57p+onbmP8+G2Mt9yXi/Eft/bbbWO84x73vbYxfv5uFX/kPt/hk/dJjH9mG+Ov7PVJB4G84ConX27rSn75nx4DkeVFLm73qyyyo2AniLT4T+fiH29j/PFY6gaJ02l0aMdlb6Lb78LCzeJOwMJrDu1+dGwxx7cbfU8qybyfa4Q56Y3/KFfA/uyQyGfvSh8id6zU8XKV+syyS0uuyfkaZJodNrMW74NZPrtcna8kd0gMmaR7HHn90D5R7Iv2pV2MKb/fNsZP34n4X9/Hl7FYmTyGOzpBh4qhDutkBuPxH4J0FQJhmRYT1ARfx+PZb7bX8ftsY/y6nfQ/fxvjq7YxvmW39Kl7OyOUrd33uddAyjTlqIw5Jw06DCx3fJc9PxK6bdB22e/CwsJN407AwmsOTcR9HRg+I/lMBws8ZxpD5F5DqUICKPuftFuLuHN1BTubXcWtck4l3sQ+I8prkek1cVxK6OlJ6Gv5HC3MHl/mvwQmcTt+jVywPCG/v72N8Z9sY3ziNsYHbGP87G2MH7t3jiAuiFUidoKYdWs9EJZLvazXjDOr36xnt2B1zXcOo2Q7caIjHQDyRqeC+mdNOR6Ad91d5Myb+IK9c0KbwMqG6LXk0wOBfOjoILOsf+VPmF9s+8ZtjLfaOyKZv4WFVxJ3AhZeU0DxzhTyKaioBeTQRN8dA8gFhY479/fuY7OQlAqaI0o5rTF3hGviPCLM+6LTuxYQiASdkGyS6POZ7WHgCFE57PDd2xhfva+//pW7O/xf3QkRixt5QlSuxUbGkrljxV13R0ivSqMJvOs5OwOmZTsR3Mc2vnoE+G8HT7KnQ0L58Cy89zbGR+1eh6/Yxvh7u0ychJftwM4Q/z0iT4cmfucuM9tp57FlsbBws7gTsPCaggo7Cb3JuKGS7s08EihPgcJ+631P7q/dLadUyo6DJuF5jWOSbpPgQ5Hp+v9a6DpvIu90zbvxnaxGxwYwqetr9u++f8j2v4xX4y5nx7wZSSvr/N91Z1iHN5q8bQ/5AZQjdDqdl2wjeZ3n2EaMYwdRV7+ue8bvf+E2xsfvwwtsB8uEPL07yJRxetuVnh2u4XrH9e/Md/OQx5bHwsJN4k7AwmsKqWCvUW55D0o4r6mUUcZvvo3xCbtSxbqSxFC8WuCA8CRFlHET74w0m6CvRZNzh50i62sggeuN+Cf7pLVv3+cQ4HbWAsdSxfLGipXsEsj8qA657nwGrepzddr13zCdo+ud3ixfoq38WRwJ3bF6ZJHDNZI8Y/MfuFvxX7nPwHfJHW0MmUP6eDrwDOHBSHkor1NlWFi4KdwJWFg4o+SOFLnWOJYV47q/aSdyrCRnIc+s1CZKyVZiT1JMws+490UTbyOfOUPHn93rJDbcvyz1Ypz4P9xnmGM5QuBJ3hBNyzvl3uTb5zOSbGTcrkdh3A4/QpK+91oen3Pq+eeeZ3qmyfOQG/JjZ0EInl3kPmsb42/tZG6n6SfX0BBHO56nnrmwcFO4E7DwmkUq1yaFJJoZCaAYIXK25MS1jkKFwNyHXXK7xMKdka33zu5vkr4PMi2eYefDMMa2HZ8lL7nZCdezfP4nDi5hiOUvbWN83L5EDOvSGed0gHAF5/BFy/YSJGkeIUn0HHleiyTqvvYikO0Sy5v2x9EZ9gxVvNs2xq/aZ/7j+bATkPcsQl94pXAnYOE1h1bCKr4k9FSgHlWIuEPZoes37tYnFrnkJ+FJhFq1TaJN0kKCnBF53v8Q+IyeeS7skHie4/+5dhpA/OC/38b4un0m/7vvHR0I3JnnElC6yB9Csm3tZnhe7/q87/MSj53etchnJlk7QRC5p2XPkY6UnaiZ3BYWbhJ3AhZeczhSwkkAbggDHNPEGnqbGCPPzU5wMeda8kYSZl8DaenO3PEvChJ1g2scIWvjcm58ys42pGym8ge3Md5jX5rl+m07P264oyyb0I+IOevkGphmky7ojsRjofMAuhyW5Shsdpwhn5npOOHO65y70ZHnHAnrexcWbhZ3AhZeU0ilCLRiVJicuyxKawf35Tvsy4FYF+26YK3VXHomATZBSoYSdhK4YTNCn6FJ+Rpwv94EkB4F085n8D/XReONYEtUZl6zcQqz+XGnayWmrJWvk8wgkySdJKqup6yvRsc5FTeR9f4QdLrX5CvD7ns0H8i0n5PXzCvt2ecT1vlbWLhZ3AlYeE0BpQapuDwprTavQ0ISOeOSn7avC3bjD13sSXr+bzKWpN1cJddvN1GfQ97XRH0puJc80vHIWfeAczskzJymjIDysswMlzrzBd5+H7d1ZjpIckniAsg2XcCXEIsE1Gl5LYm1r79sSDJ9SH69NzsWKUevG67cb0lWCwtX4U7AwmsKqeyAbmE/muJWnuzfzcxslgC5LKgJUKL2f64vbxJuS7zJWvT9s3QeSugctcyBefc5LrVzsxe+7MU+5uxBj2wchwUSuedNGtlRSmLpeEf1M4ubcWbXXwTO5fsSPPRey4v8O0x5OLzB0WGjjNPpLizcNO4ELLwmoQJE4UHqTBpi6Rl7YfOhC7bjxJ3u9ptJwpAhljphSZL+vxR9z4x4M/5jETpp5Ni4a5gp13+9b0P6N/ZleHykBE+FE9zo9DSRphxzrNzx85Z7E1sS0gxddx3fvBzFf9FIsk90/ozL0Xz2sa/3fV32JOzMD2F+EMj16J3vhYWbx52AhZcKrcBeBJxAhKJjEhdren/RNsafio+mQNi6nZMMPYq0dHs8Oom6w2bXmnzzuSAJ/dw9fW8+i6Nj/3ZaKC+fDEUGfFHsTfYd27TIlVsTZpOLxJ5klvG6LkCTVGLWDk7Fb8zufwg6/Wsm2knsD8kT92Y9mLbEbhzJPIeXjN9pnkPm+9K89z2X3rewcBXuBCxcjYe+pKnkOl0VXyvAo2fNwjONVqgoOMZ/3UObT2HyuU231QS9jrxnnTdJHqGv532NvvdUfPLjWHzHnf1Pq577KJ9rxvkAyn+2jfHv7x+Qcec2Z6pDHjMZN7quTtXZDH3fufu93nU8Q6d5SfozmJ6T/OzAnCL1fh5hna7l8Z6+1uhnmA+fl+GZh35ep9t57Xxdkr8sZ2OWj4WFB+FOwMLV6Jf+WvjCd1gqglPP6HszzYyvJa41DklB5kzqYsY6m8Gwk5l7YiexSpyS+inivRZJzn1+CcyPxH7KS8B/yuCEPPdSZ0exL94/gsLubciFYQeta+XcMp3J/rmRbeUS9P2XIIlJomwi7+fM5Jf57WdcilPfFDBdn9/3gs5vXpvJ6VRZGi2Dc/EXFh6EOwELLxypEI6QCmCmiFI5pHXkGKH3GEc3MUctcnYtY5vM791J3GVYuX6c/debQBtN0NfANNp1nsgORD4v7/Vzml7To+D/9DJA4mz8QueFr77xNTO+H641LpGDVuR5fqlSf0o8lDi6bXY7PIV+pucd3s/pax3nKLzv539a57M8zdDpNVqenWY+N5fH9X0LCy8cdwIWXgjyBVdRqARmSkhFkPfNYDoSudYK1rfEnjtnsSUmX636c7tb3fFxSM7JYJKg5HlEpB1+HyQpHxF4u/lnMD2XmhlGuo6LOzZOuZnk9pv3YQa/ZsayM2SVsp3Vn+dZX13fz4XM+7V5m93b96cc+tq1yPv7mYmjcO/33k7fZ5yTg/d3Hk6la9re77BDp9P3LCy8UNwJWHgUHCmHGZLQWwm08jIs781ntbXu+nE+P8mnJ795dzHztS/InB3d3AhGCzaRhNkkOiPUh6LTPYUkeocDMi+Oi+NlgMiZqf+Z2xg/Z/dSIBs2gXGjka5D6zFlPqvLo3ufE7N21/nMOLajTucSmH6Hz+KkFeu1zAPQOyJyZz2Hi7ID28/q5+bzMx+mdySfI2Qas3KbTj/z2ucsLFyNOwELD0Yr0hkuUbhHIG4St/ei3CAp148zFgx5QWK41SFvyFzSc6mWVjnhSeJJjufIton5GnQanfYlyHv9RKm7ubEt7e/Yxvip2xg/Mr5shtyUJ+dZf12feZzVZdfRc6PzeJRP22C6ijvOOZg+bdHd75yjkcMXdJySjAHXWVlBu3XPAzpZwPMZiA/cWtf0qFv3cHeHQ55hHMN8d3yPTsmokeXl2Nc73gy+/33PwsKDcCdg4cGYkfW5F/kofJZeErlpqjBRdnz7mTXTXx2z1SFzLFUnjTUhgiRz/mu5X0KyTdKXotPpNDkeeQ06rru4UV7Wjn/B/rUtvsnuTHUUPnLKOlHGKVtl3xagddT3Pxe6neV5x70U3i/JN9l7va1mZCuxSuaQLkMa/8o2xo/exnjjvaPJUAefNGXnwffZh4F+2TbGB+/fhv8N2xgftQ+LfOy+Ix9fTeMDQB+xfyaVuv2gbYz33cb4mdsY77hvvcuHglh6iWcKT4zzIlypkO9OLmGbYSbfozi+p9ei01tYuDfuBCw8CPmipiIQHb/v6fC+XwUqgas4UVw/YxvjU/YPhEDkWKmQ3YzAm1D9b9xTpHsUdh/kM49witA5x9OgNY4n4rO3MX7ubo1rIWqJKVfliEzT7SqUseddR1k3XZ9PiVkb6XY0w6y9CWWjRa3FiywlaS3oH7ETJ5sQMaxDG+Q7779mX/rHhEN21qNz9RXbGF+7jfF39smI37eN8YP75ET2OxAMBwH+s7HP0TXaOB/E4T9p/MC+dwDt/69tY/yZvS3gnaGDS4eB/NGZYC4JHQ3KIdkLrfx062vNt6zAfeQPTtXBwsK9cCdg4Wr0y6yS9X9PmOnJM0DyMM0ZeWgJoWxQqnzNi6+dffQ2xl8MEnemOkSZHx6ZIYnVY4eDnpg2i/sQZEcCkvaTpF7P5zheDvA8oMy/ahvjY/a141iDKumUqbLM4Yr2dlg/KvBZ3Xb9v2j43KNnd1u75F7blPfavtLqzs4ibQ3Lmo/y/ILdWmZPf0jzm/b5CT+0D+nQ/kR+gc9JibRRQf0BJ2XeB36y1o8DEUaa+QEd8mUHAeL/1t2DRUfjt+9egffcLXy+V08bosPCRMn8Xr1tJWXvu9syXlh4ctwJWLgarfRnBCBRZNzZvUBLkrAca9R9iUuRvcRRqHztDCUlAaLYdK038SZm1u4RjHtkSTc53xeklTvR+TEUiZ3rKGiIgHLylTNm6/+S3ULE2oKEOCpPZDerqyZzZe/1Gak/l8KeEXLCtnRJ/CwzZYOoJC7J22WNuMTZJe8T9+1/mYvAxjsscZS43dc/2xL/3bDnXIfyKUB+zIvtiWNuZUyZsPbZqx+i//Sd5N97t+jp0PD+pZciXfhiJveun3N1tLBwb3TAamTXI0k5ycHrvPRJGBJ2Iscp+e/ELQjJmepM6mIDmK/frSEUqso0CRryU2mlok3i1Mp1h7VEE3emfYQm52vg88yz4VkeLTqsLly2v3cfN4WMkJEW5UzJzoj5qJ1bR42j+E+BS5/d8SRtCcW2lxPIHN+mk8gHeBif/pydvNlsh/X6rhSgE0V70/LFCm6C9Kt16XHpttK4JM5DYJu2vZvX3FwIZBvzSPlx43/NPnTA2D57FrAVsPsW0Bmyk6TMuy44zziJrseFhXvjTsDCVUiiVvH3y3wKukh94Zm166xfxicZl0TJ/uldweo+1EoFTdyXIkm8iX1G6n1/okn6GvT9lMdyaUXhLqUjwwQphhlcbpYu5iQwZOk4eBJ6102fG3ZtPT4nKNuRq912iay0LrXAcZ9jgf/hfcwZV7Tj1LYvO4zWBf+z3mwvbQEnuq08Nbo9z/JLeJbL/QzotHDdNgjoTLOrIl4L5gmwQRNWPB0jrXi/7NbtTzhHYUb+Cwv3xp2AhauQijOJoAmhe+e+6PbQtS6xmN5yG+NDtzH+7DbGP4yxRpSr44TpUk9IzJ43MR/hWsWr4vP/feH9Eodh/CcMkvmiXR7MXHaWupOVkB//lWPKuuvqVUR2XhznzWsQBtcgGdzGWOGQEBPU6CDqcnbs2bFuzo/qdtYWZte1ijt+Y5bmNUj3fndMO26i83tUDjsAjs37LmLB28Fmkh/vK7PykTGT7lxS12Su16h1wMLCg8FPk8/CdUhC5zxf3o7DC6ylhJWJksVtx9IqZgf/R9sY374rCRSGitZJaamoUDq4QiX5DFcZXUro4hrl2grwPiAd8qilhLJESTLB7z/dxviA3b2JvFLGCcK1xmfXu67Oxbkl2KGRHJSDEyfx8rzrvuyLsWE6SI5/24lKErRe+G+70o1uvXPN9mgdzpB1PMOsvd4HR4Tu9VP5OPd+tFwyHd9H5cB/3llm7rMT4e/el9QxvyMnamZ9gVepPS48M/g55Y7ssIW7SDklmXcYLy+9dggclyff1mZC1+fvk9vcihWFi5WEglKJqLRUUGmhq1hS6TiOeaTI7gOVeIblM+8D0rDT4m5uuIB/dnwgRWvccd+UpxuZzOSu7LOO7FgldFl3eN7Tdf4yoMupJY51iBv4d+0kzoQvZCvoBNJedKNbjxyTZGfIa0nqHeepcPS8WX46n12eo/D+7ztg+ZGnHQrk69wCZMu7TJv+E/u6eT6ExHJKiD0J/RS63hcWDsEPDcwNGNzP2l7kkdXTje613gAtuwQh2eAehoSwluilsyyGzTOYYMM4HDPUUQIoCJWsCkTLFXJuhZLnCZXN0fUZmqRPYRa3leEpEF+rEIVH2SGc79rG+IPbGO+yt0UVnm51ZKtcQZJwyl4C73rJdtnEbZqiCT3T6nq/FqZxn7SynFrjLmOEyN9qG+PX7UMUrACwU9h1lu2ow2ftJsMkMS3XmSXcyLReBGbP6DxkXsx3ErP3zcrVz8m07FjnUJfnhnGE9CF3lsuxcyMdeSYiOls+rfaj9neEWRtvXBJn4RUAP4z//Ml9whEzh1mHSS8fJSGptyIV2QATs4aTCqmvPRSnGuwsrMM7/8DyZdoJy2lcwyFxOka41LHEGVNjhysUbX7ZzNnDKt0m41YgM7TSaYXzFOBZ6TFIpLLUmnFOAOvHv2GXDbvbuf1ntreus1Z2R3V7Dl2P59ruOeQ9nbfsePRzbF++W0d5IEy50MmBBJAV7+mv2Mb43N0SdP23VmK6yrO+sn10nZ1Dp3cJuvPwGMg0O4+n0OnM4PuY7+XRtRn5N1zeByB2wAY4LI/Dm4JbnvYPsedkucaszdE21MOed3vsNp7pLLxC4IfGBrlANKwz/bp9hyfGdJllzUQt901W6UL2MzI/anQNGxkNt8M77jmcavQznGrUWQ7hufnV8tZC4r9yAUzeYg91XJ5/KWYPO6lN9xwveiqYVjyXIhXHUfiLgM/IT6y2hUMcz1VmEDmzqtm968ftslPuyNM6nBH6i8A1becSHKU3e1+ybQk7y96Xy/LoJELieDI+YV9OxVCNn491+CLlP2sL3YYegk47IeEddVjP3d/xO+2OO7un0XGN32GiLfYjoj8CaWu9+x4YTueL9+FLtjE+cte3DjVpUNEW7MzRHlp3cX6K0A3reAuvIPjB9YtSds0pjYz/KN/v38b4sm2MT90nKL3trlDcGxtlY2KtmI4a1ixeWifZ+HS5NtJLMHtOP3MWJvoa6Dz6Ugldnbx8b7qN8V77DFdmumIpOfGIThKyBbzI+WnPVCKtdB4LrVjyXEV7Ks4l4J4c7zcNjrQnnkN7YrLQX9jbEV4g3Y1ap+lepw6Qc9fLy4Ik7SMCF7Yxr9u2aUNa6LN7gG0NWb3FvqUqyp+ON1Y48qVduYYaQs86nbWDvvYikM+ZEeBR3GvyZ7zsRIp+pvFPPe8+OMpTxyEfGYf3hXyiD6g39QW64w/tnlImzKJf3Cip2x/tInVUvjvZhvq801p4hcDPJ+8KV1cojc9JHcAGhxJhBjZKmRmcfFCBNcGMwUPwWPD0Kt11CmWdXzeywWXDmhF5YmbVSACZJuXIOKlgObfAhnccr5munQmVKS8VngrKilXJDlLMHP4ju+sMsnLnLD0eyHL2cveL30rhoTiVNmHUbyq/jt95vgTcR7q0F9y8LoHiHAvki7cx3n8b4412eboZBzKnfWS9+f9OY30J0G0x21PHzXuMM3sPOq5zWFwzjjXO9qR0vHkPdacjb8dqPbeeJbNZm8g6ewwcpdnPuxaPkcY5XPqMLvMl5ew4vmue66lzhQr1SN3S+eedYZ07H65h7g2rFSRwO77qqW6Hp9pX6r5upwuvAPhhUwRcoLiF7dF6tBFypOFpwbP5BFsl8lUr3H5/ahvj43Y3PV89Yt9nxo9110PuOTaaDVHyTAv4yHIB2XiP4szik6bKkmfwTMeqfEHcgIMOCuTDRCNmXDPZiCVlyIlxcNycWN9aRSrWHrPk5U3LJMm0X/rHQCuVU0grJi2ZTiuvJ4yT9zr5h8lu37bL7N13heQMfy3TVkZZD9Zd/n8OZN7MX+KS9ifalQ5IQ08E1yRxljHyRTGscZQ7He60xHN7X9oSxNCbDHU9HqHb0DXw+U4Au+a5WtLX3DND5+da5Ds5a+sPSd97vH/Wgc60qT+H5jiyiQ1ePybRoU9d266+bD2ZbXPW3oDtuMMXXgHwQ0PBZQxBuz7VxpcN3RdXxWHDt5fJfdzPDFuIjy0kseSZ1U1Pk72hGV/WjeSuSh4TWHA0XI8SsRZ/u789pnXjmH9/WznP3TULq5utVdk5iw9PQER88ANSoqPjUrIcnwTKpUmRY8bLFzevtxJsnLo2i5fKohXTETIfM8yUHPB5tgk32mAmL3MwnLGux0blk94VjtbjTMnMwp4C50hc9H0zSNrZAcihJNqrEyh5R9j45RvD45N1lHXu+zhrC6I7mDP0/dfAvDWh9zMa3nMuf/28fO452G67/WaY+dBaBpal389O/xJwXw5HZR70gM6e4zn3YjxB7P/xPoGOzrH6rTu83V41WDrOtW144UbAD8oG4sMlypg5ikTlMWug2SgFFkOOvzuLm/+EQYpMDvuObYy/vn+liRmeED7WL6SPCx9rmI0w+GoWS7wgWpZ3MAvU2fcCBciRcEBngXiMabPbGuu8WffJLHM6LJA1Y5DM5mdOAOu/v3Qb41v2TgiWkPl3CCJnZUPmqUB94TxXISgfZIhs8iU1LF9i5do4de1UvK6zGTpu56eRCs4yEI48UEoMx9CJc2tW51hoRdjgkiST1LJRct6K6qnRJJ5E3nEtzyxcIAc7Ms4bIAwip+3y7qGw2RnQ4Qqg7K0z5M11V0dwzQlxSVK2u0vaQ7ena9HpdPoJ8iWB0m7Mu9dsV1mWRJJvGxZ5X96b6R7FyXTtaIi8t9PMa42Wkc/pay1D8+iRMAwKdBLE/hm7FxTvJ8TebS/fsWy73T5PXVu4UfCjwmGsBsUCsTmZS4I613ht5DZ4X1jhiwG4ptLSfY8Lm+cCyAHFxpePsPbYdAWLhb28ce9DHOCvxn92ZuIaH5VgrJGxfiaYkA7pkX5OVPM/ZO1EtSxLv8iJlAUvm0oF2LtXQSiTTiPRL3crxb52FM+4HSaOynMKpGcZrFM/TYn8kCtu4V+7D7OgZLDIaU+0K4m5lQaKxPkTSd6tnPr8KdBEfkTmnqfy9Dzj+n4B9iTQM8RSPT72wTfC2YY1O46zNmMb8x3LOpqh7z9C33ctOr1TMP++H/2eZfmMpw5xyMGPw2g4EC6Qn3GMl8ZFgvbbBgjwXoc3sl5ET3I9JUvCra88Tx2S/1tmhiML3zs+WUvb0Q1P57jbp23S96zb7iL0VxD86P6kt4fFwHaFEKQvRC5Lyh4mxyasbLjAhpvKyN61s7/5n+QPfGF8SUW+ZL64+ZLmS9kvI2lqFWRvvF+cSxRVv6yJa4mzFcA18Pl2JDrtfk4TAkfC7bjx37R8huUhHGXCZjhsBMOwBMvzcAE6T8KPUjQhNjnS7pr4ngut3GYgXpaBMqaizHCtcdNVHsgHj9J77J++dd04bZR2ObMQs65OodvENeg2dR90mqDznv/7nhmRI4vUDxI677druRkmZE4LE1Px/DFhF+8fE8rwAH7KNsbv2CcVssyP4Yzfth8559OwDA/hsfus3WvHJ3nZ6x4DgnS/bzcK8DJiDGgQOK/BcqV+y3okvOXlPcrBY96TsjEO6WqE0AlksinDNHQQefdsr7ZPjra/bO/d5vudWLhR+AdlQ8W6phq3KWPgWGASqUofaK0BGpwN0QZr4+4Xt3Ep+WWnIDsHIl+gDAeXPkOcUlIzmJcOvyatfuEvBfeqAE+VU8I4kknm0f92ghwfx5OC94NPuOLyc0e32dLCVBiNVCAvgzLpvM2I3PLk+D/IdCRzjzmf44137xcTnFgRASnxTmW76Tbd6Hp6DHR7ui9m6eVzktQ4zzJp6dKGaacQJW0N4uQ/8mJYjOWzrCphfwc2I0KedCjRVXiHGHJzKM6Z4bRR4ORc4dwdV68QlxUsDuP96D090mX4j/kgrGxhySX7J7Ay6I/tm0XhPeQTq+hKjQmPlE09qWcrOwEJ38uWE/89AuXEERnxTjJpjmVutDc7mkDPUHrKXrb3b+ERwY8KKyeX0eBp2HzlCjc2PVIIgQbJURI/epFnL/UR8t6je5rMj4jdl6IJq5/T15qUZ3Eybh7P3XP03Ly/ZXApuDeV4xHyno6fHTHOURZep95RqHy+FWXmjlYApQmhzybeiCb2ViZH9z0lJOqj/CSZz64D3pv8j1yc5AYBsSNeKnnkK4nZDrL9dv3N6jHr7FL0vQ+F6dpeyLud/TQAvNbt1LX0kCHDY1jEDOH8/l33QNjMpfEDJxI0/53gisvZybPCybVcy8myCb/al/G934mcwOfk5F0n3NpZIH8QP/llPhCWP9b+X949MawGcmKt+hPofZCwlZ+GiXK2TShzw+10Y63zmWU3paG9ap1L6LO2OwtbuGHwY2WrdDmnUdPYaSAsa6OB4ma1B83RBgWysWWD6xdYqLy83griKZEdA8P6xbkkb0dxMo1L41yDTmsGrfO+1zCtCOJRnyge5i7gGnY7YBUfR9tJbwaTkCCPiPJlQLb7o3w6H8BrHUdZ8L6g/CGbn7G7fHEH874g51TS1Inv0KV1eE3cGbruHwOmffQu815JWJAX7cpJshAdhIe1y2RVJq8yARZLU8J2GEdSSugtSa9Jt7msq+xYJjreKSRRZgePcDtydnjRnRhFeBCw7n/9NsYf2F36dPAgYYcO3A6ad89OXsqUc+WacrZNMfeIjvdvjaWh5CHldWkZF24Y/tFNk725dBniksLawN3Ki6j7yIbWSsOXvBVKKgAbY8aZYaZA+nqn/1DMntnn94UvapY9n3ctOv2GcawrjrrSCVeBoEz+0e5GxMpgtQB1r+cmx8c5JtFdoiyOCPE5Yd6POiUZT+9Vjk1q4aE8cdHiBv6Lu4JFQesendW1baHr6xK0wr8E3W4eC3QC83+6mZ3ExbwLVrh8wTbGR++WLCtRtLi1frWQbXNZL+fqaIaOb10nmZ9LV/LO+5LU8xr/yTeTH20bWvuUEbJFl7LHBcNWP29fGcLHmhizZyUQww1a83aynQvk3CO9PMic/xyRMbPgtdRd1naufAuvEPjRXZjWFkfCaKAcOaeR0lAYT8KNiHuMxsRLS8OjsfkyZ4+yFQuYkdql0KJuN9RjIZVVX7sEl943U/L3Qafb8DlaS07Coq5QAliQ1CUTiFg2qCud9mDdc6RdqCAME+cUhsQp+vpzovN0lD8VuV/Q0x2Lu5VNYNi3n0laKGKVre+B8zs4d6gq6+9cfc7CecY178BRu+nwc+g8SN7AiadY4Ix7sywU7x5LUlmCyjg1xAbZZVuygzizJI3T4ffFfdqh8SXtJHTfBcvR+fW6FrxlB5zThpAL7eid9840k/RYxcMyYt5R5xNoxStnvTzWB3LHK4RHQAu9y9nnC68Q8qQnU+Q1G6hfemLciGU3ND6WjdHwnFmekz5ocBxPWRStLE4pkBeNzENf63idvz4/hS7jQ9BpAxW9UPFqMfHi/519nO/n75OAtCBQOG57SzvQEqcdqMTuNKRoO6nkRCpR03pZFEvmyTJ0/n0nHE9FAeMixsXJEkk7tVpVyNyx0K7vJOEeZ74PLmkPHe8o/BQ6PcqhRQ7ZYF2iCxj/ZsdIhuqcjGZbcgxaQpPIW94p9243hrd1nPXZaVyCfkaDa/lMw07dn/nKMDsFdAwdynLrbD0+uOvpBP2CbYyP32e0s4wX74+dcttXGkhcY5Y+czhIq8twKr8LNw5+7FVmZc8aIiBOvogoOFyN/9Y+3soEOsZycBtBHC4Zc6nYEamfUiwd76HIxt/XfN65576ovCVaDjP0PcCyOTkJOFZHx+sLtzE+fHf58dJTj26DSx1T96lwVUDZJmwr2Ta8r+PmPeJahZL3No7i+YxO6whH93HuJCjkxZwCLCi8GlhOyPeoTVlPWuZa7NZT1921yDZwqk2cazOzeJn3bE92Cl02hhUO4bCLGWPgeHggpuwINpRzy9prfZ56KevoUvR9s/uPwjrvjc7brAynytNWtNcJdywczyidboY9+VwuY/FY8O6v4YoJ6ocwOlcfuN/f6fp+nsrjwo2iAy6tZBuHFrubZeA2onf+mftyCveh1oJR6aXlwnlaLSqdVkKpAFU0KshTMF5brSqqflY/t9HXTKfTb8zSNl89aW0mjw7LeMoU4I5z6QyEgwuOtbls/sJMXCccOW7ZL3crNdFtYIZr459CptUKMOGzjNfXQaedOOqAAEhJImfcl6VKKEvkbCf1knrv8yP0vRm/w2cwXncuMo1s892p6HfKdimR055YosXELtqTn/u0LTFerIcHuZ5qBw9pJ9fel23kPvefw0PKcgrIkDbIMI/j8X4TAYLHC/Jh2xifu2/ExXp5CJ6dL1mLT91wb74/op+18ArgTsA9oNLUpUaDgzSY3cn6SMidCR+4eVEKbsigqy6VVSuvmcI7RaAd9yis0c+5BN57bX4aXjNed3jyXv/7PI7I1L0CIHGAJf4n95edLXDxoqB0UQpO2NH6fhGK6LFwROpgZmkYfuSOPQcVqJYRrnVcngxNMJapvJ1Q2HV3H3R76LZxLs45kGdd+6bVbZXySOTEdXkd4ZA4M7K/cv/OAVYi7zfvOZC4j9AyXrgO3b495wjB+x0A9O2v2j2lDH189U76tGXvW4T+iuNOwANAI8mJHxx58V2niasShcAsambKQ/C47txiNi0eFY8z4VsBqZyMp0VCGm2ZeE3rY5ZWw3TPHWdIZd0K+ejZkjjHvMdx2AzTje7sV3rkrHNlO0iWSuEh4StxkNHsa3cv+8t8XxI4p6haodkJ5Rry8Rzrh2V6v2wfi8SFmTu6WU/W21GdX4JsF7O2kXEyrNFxZpjFpQ1leLYtrD22pWUWNpMlIQ3aUo6Jnxr/XngcNKGnvPnvDHpd88yip/0yBEJb9p0X932/Fm4AdwLuCRpN9tSzEfHy+1lSSIZeI71JlvgwFsRXzXDjufGG2ypqdUr0KtIk7JkSFFomp5RfpnVfdPo+I499DaQSz2uW0fw7qxX5+OU3jkzGYvwShcusVjpN7pKF5aSrrifxdN09N5JoX5RVJ4E3aJsuzUMhvsk+RsmMddoiyPqw4+WGIGn53ge2g34G6Lbd910Dx+/5n22e/5TDuS68b7yLfCjml+/EAEHY4XEyl/8Xmb94tIz7/eCcuvCTqpC4na1F5q8x3Am4J44UsT14GpxWe87qxIKkV8lszvfc11DioudDK+wc5XfX3WFJxaZCkhRVtK0UVVpJnobfVzkmMo2j9DIvoIk880cZKKdEjrsTCxGXJ3MScKN/zE7gyAz58QLnblnKPOujSbPr6Tlh2+k25HkqpPuWQSLyfknJFRvI8iP3bxhokTvvw+EPYN3Y3h5K6Nlejog92841MG2OpmOYZbCdMZxA2WlbrF5xXFxvm+Qwq6eFF4tTsj56Xxw2ss76voVXFHcC7oFTDSYVsj163fI0NuKoYLEmGQ9yhyVmYeM+5hOrTPCA5Jns4cxOJ9tB9i6XA37IRVe+ykukyzSVHVCpJumeO7YCTRBHa478uNWl3ghJw/FvZxBTTjwX7F3N3tF8Tx7ScWtHN3nxxfXlbfnfMprEryVz4/klKoCM7PxAWGyeg4fD74/Trmwb1Ivto4dDJMLHIHRhe8n2KLpdNfq+vEY+zSPlcC0zbY4VKbxbDC8wz8INSRyKsB66ThaxPz0ukbdeUuqIuTJ9PWFddvjCDeNOwD2QyrbD2iqiwfX9WksoEWfKasWzDaS7K6FwmNXJ+l/2FeeLSX94tyzYxAKLHkvDrRQh/NxhSZJuS7iVpwqxiXt2JG6mm4qVZwhJ2x32nDHMOCVL/Zg1zPpdJrHx7XYmsuE+dza6k9mQCZ2e3LWte+kp2z7PunmZXabZEWwkmVg+49uOQLc1riM3hiToLLLrIdsZOz4OyelG7zYg4XqtyfghaHI+wql7bHe2ab0KGZ9wyJzdxGhzHxffrnd2uhOojupDOdJJcjhn1sYWHh+XEDrtPye8ZsdM+O6rd8+luXBDuBNwD6ho+T9TxBLHTFEAlbANLBubjTJJXwsfOIEJon/X/dOvfNQBZcUEMbaaZLYnCuw7d9c1Fr5j0cBvIufnV6+B6QjSBjwHQBpMWPvybYzP2z/XyNei8D6QZ/LvRybcWEJCynIrDzEj9KyPDs/6SVke1ctzQcXV7egIWSbHEZWXY4uOkTND+/dtY3zb3qGSxJv8ksiBnbUZqTZBX4sm5752FC+RHckExE5nBdDZxetDp5H14rY1lbry7ProujGesp21s4XHw4zIZ/Xlu0x9uhzV98P7vZ7otBduGHcCrkQq01ayHdf4raz7vK/l9SS4HJPHwsgvJDnr0/XxWPpMGsPyZXtFZu2yHSUT8xi3Z/Y9nQC2tGWiHks/GMvH5f3ZO/gv+HYy3gHiMSTA9pa4xtkC9N/exvg/7Vvksk7XzzqSDy1uAYlrfefMYRSlZbXsLcsjKPtTcs20j+rquWCdH+Vfos6w9jbwHxnSFvB0UB/UG0MZeEkgczpyTYyNJteja/dFpzlL186FSM9Qxs84XNcrhBeIdcoM27h7mO0rZXYk85etfSzMMas76y/rNg2F5WF5xXAn4ErQGJp4VBKzhpKN7lpCaYXTz+10umHbEXAvbsdRIVmJHzBJKmG4yM84ej03akkr22c2ASX6BRNZLtEymeHoxW5cK/8XhS5nXxdJQgnq0zLrvaFu6URB5HhpmLkNyTmfQRLUOm9CzeMRmnjvg1maR+kT1sM8xnNox7Fx3OtsKETH8512LxBtHhkhy1NybvkmztXRwtMj9cMlddXx+vrCDeNOwD2QDaqvzfBQJXHt8yRLrV8tYP9jGbunspay1j/kbJjfT84vKRmeMExCt4zmp1+ifMEuLdup6y3bvp7PmF1/SmTZj/Lb8TkSN3fAQtZ2qiAvvjHAGnKGQJivAMFBgE5mAzl7/YhEm1Bn6HjXwDTaVZ5pk++eyCmx89+Z+BwZNmKP/v9gG+Pto7OabZU2ad0ju+wYp/y9nh3OWbyF50e/R6uOXqO4E/AS4RTpzMIaeX8SwSx8lqbKLl+SvCZUeFrV+XJ1no7Qzz6HWf4bp669LEhZpSLKeko5ZnxkDlG5eQ5Ezk5Z7JLFHAbmNziOPJso1qR6hHPxOr1rwP09kTJJ3TjG9xr/IXDKyRAC4+PsxsiMfeaTOJEy2y//eyjHTmfGm9VPz2vpelx4fszeo46z8IrjTsAj4iENLJV6X7sU/fyHpncf+NwOX/hfkARt3fg/68owjg5pOD6OJcqKByxTLFQ/ViHh6pqWOCV2/kOK6b5OHFnMkmyH3QezZ7U1ns9iyMCVEnRYmHTJRzp+/f59cYhc7xHk2x0gvEsAYp+1TcNmY6uZlullvS08D5b8F16POwGPiFbWlzQ842X8S+67FKabiqnj5DWvz8oyS6sV3CV5N41L4jbuc8/LhJRfhmW5uOaEQcbGscgh8vfYJyR+x+5ChwR7zbUz05PIOdcF34QpJPkm9BnJNknfFz43n0m4nQ3y7A6KWORfsq+WYMInnZucs6HsIO+U8cyTNKuLrpOGadlp6OsLT4d+XxZew7gTcA9cogBmmN1zrnF6faZ8RMZppXWEvudSdDpH6Ps6zx3/CH1fo5+T+Tz6/9w4lw/KhcXJWDArBt5v/3ocSxCZqe5EN8eSdUlLkp77P0m4ifw+aGK+Fp3eLG3KBpGzayJEzhwBlp65WgJipdPjciXkhhXesmy5n2qD5+rlZWpDr1V0HVqPXTezeOqLTnPhhnEn4ErQKOyp99Khho3MxtQzuTt+w/szjX62aWW8PJ+l2Wln+t6f5wme3Wk2TLNnr8/ye5THU3loXBO3n/VY6DKdKt8MyEmLnFUF7JL36/Y9BfgQDe5mLFaIbmZBAy3wJs3Z+SzeEWbu+SZp0+qwvn4EykT52F2Q4QPGypnkxxyBN95JHOtbC3nWtpDjUR3P2lTHmcXvsHP3LbxYdB2Cft/6eqPrdeGGcSfgHrhvw5gpiUuRjdWdkWZpdYPOOE706fAjdFre6/3XotOf4eieWViH94s7Q99/lNapeA2fbWdLOWXn6yiPjv9CWOwbwK6An7KN8c27uxmLXBLPJWdJkE2cTZ59ra/PkK7wRsdtkD7xcix/NsMemCZkTln/y7DIca27dwGyarnfF9fU7cLLh0ve0X6XL7ln4QZxJ+DGIFFAEn3N60kc2YA5P+dVSORL0KQ4Q9//XOh8HcljhmvLY7pJ5ljaKa+UmXXgBkEQFm51Nufhi1/sNY51KqHmGvJ0rT8ETapJxHn9UiLvOAwJmFZ7DSyD8bXG2QwGIufLb8zeZ7jBZWfZXo/a/cLCwmsQdwJuDJJCut1PkU+Smbgkzql0ryFI43vPJfGfGpfkaSajjpPgenpRvB+ScpKb+6uzTe8P7MQGGfr5XJBEi5Xb5Hwtmoz7+lG8I0DKuUxOwvaaz+CohwGSdy95ZuhD5OxgCJEzJu6eBk52s/3oZr+kvhYWFl4DuBNwozhFKn2N/0fu9iTbRqeb9xjnUuX6MhN64ih/mf+W05G8kLmb77iRD+Pjv3T/4hc7m/npUl3STeQSoOcPhemdS7OJ+wgz13ymy39JnyPxIXI+E8y37T9w91Cwtz8E3p1U5c01vRozWS8sLLwGcSfgFQAKLl2+OVnIOElETe6NJCnD+pmn0OkdpX1fdJpH6Hxl3jrNU+n39dmYeD6Pc47Ew+LE8nzPfc/8v7tb4lirTADzc7Lpmm5i1eoF+f8+aEJvGCcJ+yju0TUJ3DjMVpfoGSP/wvh8KR0chh2YDJjLz4RtWeu8Zb2wsPAaxp2AG0cSjSTtGG4rviSgJnSvN0l1Gkc4R4JPic5L45r4xrETlC7f2XVkj0XOGDBfOvvIbYw/v89Ud99xJ7lpsUq2kiPHXFMu0YLHIPQXCZ9DPimn372nE+MYOXvO+4323C4YGc7aFdd0wfO/4ywsLLxGcSfgBpEkkjtgAVySKsnZPUcEZnjGm0EyO4dOP9Fxr0XnqcvU8UWW71zcvkfClnwkb0AdQE6Mi7/VNsZv2L/3zrpxdzjTCs8x5l5D3lY6cbynx9MfgiTffMYMSdYza/wIWOV++exP7Z/5xRqnfbalnZMInXegfC+po4WFhdco7gTcGJKUVHoSDpOtWL/s19HcMtSPr0j0SX5NjJKWxJW4Vrnmcy4l0EvQ+RIdL+Gz75MX5QJxY33nJ2uRM5+oZb00s9T5Fjxj4v0xlFNkCLFqlfNfIpVo+94m6PvC9JrEZzAvnXfhdSb00Ylhyd0XbWP8gt0ip/3ZhrKu8r9EbxvtelhYWFh4A9wJeAUAUUMwkMtf3Mb4hm2Mz9vG+LXbGO+2K1Q/6CGpp4XZxJhoIvSZXtdN6vlRR0BF3m7Vjgu6fI1M03QTaQHmc5vMu2xZvgT3IidICRmyPvrd921I//Q+uQ1rlDFxiXxGxEeQDL3vknubnK/F7Pn9zCR079FT4HUn8WGRM2Mdi/zz98+40rGkXUrmWben5H1NW1hYWHgN407ADUPSgkT9cAdbhDJei3LF1ctyKD5m8enbGL94G+PtdkXLGC/jmFrxwM+ktuJNcszwJMxEW/idb93Xec8svT43rNPL5/Q9fQ5OdSogbuSAJY5M6AghL7YdfZ9tjE/Yxvgr2xjfvVviEhpEzrHJUsLssCbWmUWccY/uvw86rX6WefCcjkYumdObQJmRAW2N4YU/uo3xs7YxfnQQOceuL+tjFt51ZX1neN+3sLDwGsWdgBsDig1C0mpUCUJAEA9f4fqhncy1GnGDsjyKsH+4byf6H21j/OptjHfdyepHhBJmPFjSk3hVqJwTnkq3le8lMN+pqNuynqHTOQXzm2Uw3P9a3mmB0zFi6OK9tjF+6z4e/u37xC6JDJki29y9TRJ8CjRJX4pOZwbjZQcjwznSlsDf38b45P0LcHQQ/f44sJ1aD3qDZnWSbeJUPepp6TgLCwuvQdwJuDGgzPzGM4rOMK10XMG4PSEbLEatL925EBBWFeuA+YIVFvw37eui/9198tKb7aSGFe/HMBw3dtKdu3j1pDwJ/xQuJe8ZOq2GSj/zo9XtfAL+UybLhxXOEqr33sb4TdsYX7CN8bd2AqdT5M5nyNGvmwFlK1meG2c+dU1cSr5N1JfCfMy8BsLr3qNrHTkwNk6H8Vu3Mf7P2xhvG8M5tkmPIom9CT3b8FH95j2m03EWFhZeg7gT8IoAJQdZMV7+h3ayhrhVyJKAs61Rzi6jElhcuE9R2Hxr+z/ZxvjEfanRz97G+In7mmrG6t1jG5KHIHumcit0FXJ2RK7FLE3nBOQ186DL104JBE5H5Sft7nNmo+OpYEji+3YCp/yAiV10irTCk+CyoySS3JsgE+euz9Bu+Cbpa5DpdX5IP8tJGGWnnejd+ZptjA/fO33I0y1a7eQhe4mZo3WRZG144ppO28LCwsLrcCfgFQIKFQXLrOuv2hUxxIRydktRFLlrnFuhq9S5T0jyWP24nRk/ZqyU73J/2G7RM/EOssfKhexV9Oz+JZk27AwI3PzpBUhwzeudTsLxbsAXuiBuOiIftI3x8dsYn7ON8Zd2NzHkjWzcglTCzLFi5UM4JE6clFcSo7JLWTZa1peiLeom6WvA/UeeBAmdslLvfhwGImctPTP5GR93/bidKTw1OfENr01+ylQCb7KeEXuTfLfxhYWFhdfjTsCNIZUg5x7977IqCJY9wiEuLXUgKaWCl+ST6AmjAwDhMYPZnc0cm0fZQ/ROiuKjIrhhseBQ/lj3n7mN8Xv2cX2s4Q/ZP0KCdfxz9glUP30fx3/nfW/zd9j//5T9CN5lBx0H4rMUip3G+CLXr9/J+j/cxvgT2xhfvM/yZ/kYngbySZ7JJ0fKotVNOXKnNsstebclSxziOvmt5djW7RGQ8+wZ59DPvC9IS/LO9CVzwJAMu9p92t4poqPmZjCQd3pFknizPRJn1n47zPBGx+lnLSwsvMZxJ+DGgEJzTLKvqfCwnFC87FT2ZTvh/nc7kanQZ1DJz0hGK5H7k4iMn/cByZ/nAvIASdDBYIIeW4Bi9dMRYByfWdLiH+1W4ffv4D9xiMt9gHRIF6KWtJ2slsu/mjQ5QlhHXoomP69lGoZ3WF9v+QoJfZbPjtt5maXb1xsdX/A88uDwC3JkqOZv7J0w2g+TJV0BIUGnNZ6kLdl2JzPPT+GI0D1fhP70OKqTW8arUJ5r835t/FN4qdrEnYBXCKk8dV8zg50la5Ci46EocgmIMBV/hie5JPHNCML4EhVpatHzPHcNE4SZl1Pgvjz3Xu8X+XWy2fh25n2W/6PwU7jknnxmx28iPyL1vtdjWvmzOHme3hfiIy/Cda0Dljr+yd3zwTwDhksgcmetN5k++4s8QSoY89uKp8NeJbQ8xKxDld6Vo3sJN16in3trOCpLlz/l0HE6nU7rVHoPhc/u552C8Tl2eo2+t689Z7nvpN+RbhFZqK60rDDXUjPuicubiW5YtShwXM2SQZJHEoQE0EQ1I0zQxASO4l4KvQaJJKxT6LRExzsXv3HpPZfEaVmJU2kYP/Ph/cZN2XuE1Kl7jnhMsMa/bRvj9+1DGxA5cxHw8Mw8QHdepmeCSqTD+11oJWO4/2/xOEO/97NrfT/nKaO+L+M08p5bPHY5vHYOmUamM0vv0jQfgn7eJeg07gPSeVHlPZXO9Dkd6RaRL2gKNBsWblGuY10xQY2JYoxPM6sbd7WWNFZvkkmTXBIK8bgvySXJRqLJ60fo9Gfoe6659zHuPwXT6bQ7/b52CknunVZeT6JuKx2yzjSJQz07DwJC/wf7/uqsXsCD4/I9xslz1cCdl+cg7KlhO+/wc8rFd+To+q3iqMxNOH299YZheU/K9Og5t4gsR5a5y9fymMU5winZPxayXjqfD3nuUbqXlv0cjtL3GbPnTMM70i0iC61ALKhCyY1hAC5UZoGzrO0X7pulMGmM8WysNZS9xNAkkxO4JJkmnL7vWmQ659LreEfo+669/6HIZ0KsLcNZ3FMWel7r+zLM8XmGJpxjQB1/7T5JkQmHLD+ExBmWwZOTFvnRy2tb6/b4lEgF0Pnz+iw87+3wVxWtLFs2Mx2S8VtWR3K9dXS5u5znrs9wn3vug6w7z7OeTz034/Z9p+J0Otei0+s2lzI7+8w7ATcIC5jCyELPzl2zjQJ3WRmzxfmABq5Xx6WPCMP/EEWTURPLDGl9nkPf27j22Y2+/1p0eo0uT6PjX4ok9J5tT7o5yQ4ixxPznfscClYV0Jmj3t0cyL0Dsp10W+t2d/LlegLY5nuW/bX5ynfolo4JwloJnsKR54Vzked57+yeWz3OypTXMzxx6lojn9PPem50u2hcU86G9yY67b4nYbzcu4Tz/P8GaXQCt4hsfCksr1voDDPcMIQDuTNuyh7v7I7GLHK/liXBu3Zd4kjr8VJINk5ek3gkqGvTvJZgZ+g0rkGndWkZJNtZ3H5GPietezsEXnfiobLFGmdFAPXJsj4+58pMddfqMxTjGvFsP+detJcF5jkJPctwrhz57tziMUFYy+AIKkTQaXGe6HDT6Liz/N3CMUHYfXHufq6n7F4GZJ7O4VoZpVy9v9M8JYu+v7eOfmUJvQWUFdBxjd/CRbEDrDWIHXc8Y+wsV/rb+6x4xluT1JNYdMNfQk59fYa+59R9He8IfV+j41+CTqPR8a+5N9PwvzJ3pnrKnHM6X0x0ZLMctu9lf/63iG+P404Xsxeid/HrtvMyotvzJYrn3PVbReuAmTz63W9ZpBIF557R128NKZ8sd74H2WGc3X8ky1Poerkvuj6P8uLzjN/l7v8Zd1Zu0c9tmOYs7UbH6Wc17uSrI9wiUuiNjMd5Csne+azBcg7Bs3kIs+Lff5849T37+GsuO3NjllOkLjFdQ2TXoMlyhr6n0fEvQafxomHnyWV+TG6DxKkTtqtlEx8+48qacSa1QeKOh2f9z+o9w2bXLnnBngPdrs8phFPXbh39/p8r51Gc1ClH17WWZtdvCd0eKFO/B2L27YCW1aXyuCbuKXSdH8Fn5TPNw6m8dDpCi7mNAOV0afs4evYsrK/fidORbh0p6EuE6T2pvBOEuwc6460/ft/yk8+ySu4QS7rOXRMNAUl6TX4Soi7jRsc/Cuv0rsWlaRzFOeq8JNIt3s88hXTdK1fOneDGmDiWOFvvsuve2+wkTl25e1t/LKfbA+dd5+cwfZGeCeTDtuuRtm+5Z/mcleVWMStXKlbOlVPL4UgWnY5pJJxzYYex83UraDl0OfNayoN7z8XP9Gc49cxr0OlYtnP59T6vz+SSaWa74v2yDbgSpiEH5cfDZjB+PzOfbX47XGPl9eibXwW0wKywjncqPuEpSBuE7nhmRbP9KuOyjM+yLajbyuKah9BxzfN/RmiS0xHBeW2Gjpvk2uPLoO9vdDrXIvOcz5WMiSMRu4xsdr//vd+OEeSNFQ5YhfCN+3JDOlZ8plR3Oi/W7Mt71l3W7az+O94RTr34zwHzpaWQX89zVzs/GAP80p7hwvNbO1Im95jIbyDYsZvVucj20W1FRTurZ57pPAyeO8vXrRyBbcPvDiRZSVgpR9+zfBfy+iXviHLu8Gth3fF/Ro7k1evG9V3xWxnKAZkQ5nc3eIdcDfWm+3dB+CYG23KzOsZtuAHnDNPyxUXm6rxJfLyLNJx87fc9/H6Hz/fd5DiTS+qg2fXX4U7AK4J8MWfIBtcNr89tzByteBQIgrfC+doWM6d/y74E7u/tW7v6wRN3cYOg0qrN/01yTZxNfh2WOHd9hn7WESTbHMfuOMZLD0Re41zXOf8lfDtCLjFjO1w6S+xLzz717HPPEAhyb0s8x8Vn9dxtRJx7Sbz/2nSfEipdZILi4cNArKlHqXDO8cfuINxrnHM07BaRZeA9fPP9yDkKlQ7fHUsm6tv6nF3PdpFtACWMcuejR8i383QrUG60lx+1Twr+keHpgmD09qTMWk4SZMbr92V23yy9a3FJOjxfi5l3BcKmjIA2guf1PbYxPnAb42O2MT511+N8fAv9w+oY5lGhj1gFlV+iRE8Jzv+rfSLu9+738S0N0iE9vufBZ5Y/ct+Fku9CvPWu08gL+VKvSfB2Ui7yOt8JeIXQSjhd8acEMwu3IXhfNl57q7zkKI832j8Gw7g765z50hsfR6HCIXeteK1OCMwxYde/J9GmNd+QDPuex7TQ09I+dY/PzeEHw8ynFrfDFFxzHBzZ8ELgRv/SbYzfvsuQl40eMg3dOrA+rYOu65mba1av1q3oa41M69J7XiRsi8gF+bA5zlfvHyJCEQF2ROR79t+0g/95nmG3CDw2loGyCsLYh5+vC7rjn1aldZdtpGWbcTIcZfvTQtl3fm4J1j+kw74MtJ0v3D9ChHHCUBYfgPLzwJKN7xed6Hx/8t1IEjJ8Jt+W+zXwWZ12guvkA3KkDHRaIFFWM6FjvmKf+AwJq5v9FkYaLalfZzq3oS5Ev6PjTFe9z7PwOPLsr9yHDj923xfl7aIzqoWvRY/8ldudjmoX/hZBZR5VqNe60V3bkLLhZHpJHPZSURwIHfcfFUGFvOU2xntvY/y72xifvY3x1/YxeN30SXCARuASrG4kIC17w7pBNTE/Bkh35lrP/HR+KYckL6HTsO3Nfv02xufuk9n44tyP260ElLBfM9Md2MrVuuGa3hMtisasjdy3LWQb6OtPCZ6vyw5lhRLOT+F69H+Gp4LJSZ63hCxTfuuAc94r9uTn08Z2CJGV7ytHPTyzeuz2IyCGn7FbYLRhZNj5uhUgO40JzpGhcvQ6ZaTjwrcN0F+4lyEa301Xj/COphUJThH6Kb19KXxGDgvks/hPHskv2zl/1DbGf7rrXjyo7hjZMshJzq3TGqkbZyAdvZEpV+sAvaic5QI+uEUHi5U6bFOOJe++GRo2M114N+AG0ZU4QzayU/EuBcKcWYFe57+N2bg0fMidxkXlMBbDZjafuI3xWbsl/x37+nd6bmnRc4TkteabJO1J2ngubYyXwMaaJD6DLwbQ6nZnNkiGHjB7pX/5/nnXX7MTOD1R14Y7Fp4ynTbckPMp8DI/Vp0nHrMtPQTKh9477YoePjseohz86IzojhjQ+rhlzDqUhNMOcY/yOWGsslSEoudctGxFy5rhNQghvVG3CpfhztpJegYpK+8xn4X+/N17lpsz5VAkskpS9Tzflz5/CEjH9935E+gTdMsv2Y0oJzGjk9SRdMYkcGUwM166fZ1C30v76HTzPK9L/N6H3kfmfHETj9CnbGO8b1jvdlBfL4sWzC0iX7prkY3ORjEDjZTGekkD7Di6RUzHxs+Rl4GGhyWP0mE8S6LHYv2kffe6v7qPx0j2VLKfTJXsfQlpHPmC9gtsYxP58s7gdRtepktv0rzwsnDkk6+4PHGb08P86G2MX773kBmro1NDmVGMTmSSyFWuWS8py1QMyJWjCsTrfY91Ypr+P6rvrr+XGeQXmbn3PLKmfaAYTlkNrypUvByT0G1zEHjLsAk924HyNYw2B1m81542z7hG2b+MkFgoh0ZBkpjvPmVF1zg0yHgynkZc1+z1kB2mHu/N90/Mwh4CdKoeUeY2fMQ2xtfsBK5FrCeUslnuhjovZZP/E8ondWtfTznnufdkfpR1ejMJQ950IJ1XxHAJE4MZDkHur5djC+UW8ZCGcaTUfZFFht/nWaY3O88XgP90HCA5lTREDxEyCQd318/bx7bY9IYeG0voGAfCdY0FzMdGcDW6Lz3wO+wiJ3IcwbjufQ5Z4yKHsOlcME77l7YxPmcb45O3MX7d3hEhj4x7M9EDy9sevJPWhHJMuYJTpG541kfLutHxG5mndBF2Oi8ryCuypa3gcodo2upq5X2kdBodN+N3+HOi8w20KD9hn2zUZG4dW+8ZfgTi0pZxgZL2TBadjwzP612G5wD5SA9D5juJijgSvF44wiFJPG9/YBvjp+5t0GGMbqfglO48pcePwgV1w3N5/vvt+lD3dRsiwLIoB0k8id54/u97j2TV13xO/s9ngPS0ZofCtIkrseumRydjMKFfXy+7FsxrFQrkHPq+xwJpp9JwHF43lha9y3JcMuNHZiBOXflMYGFSHsRKD+599okWuMhY6gXxMi7zm7Yx/r29Y/DbtjF+6zbGb97HyT58G+Pf2cb4ldsY/9Y+/k9abNjCfAA6GHQ0XIJhfnR3kVeXxaSb84gor5XtQ+uk67XR8V9WkFfICHkjd+qTFz3deK1IWsmkF6ZxpICO0nxqnHo2MqBDioVOG6UdpuyarFOms3j8pw3TphkqgtBnyv0aPLf8QNc5uLRcxKW9QZx45fDEMVs+ZY3sUr/ZZlvmeT3rgDDSM6zrh2voGiYj07Fg/Fkix53eZbNdJyhvljnrJevHeOdkle/MDC3DU2k1iAepM1zAUAJtW2/lGwhm4eWADboVTV8XSZbAyXlYJHYMaPAq/QRub8l4RsqCNBxvzGd1Xi5Bl2fh/kCe1LfrZ48I/UiZCBVJK7zZPan8Ot2nPh6BMmDxSOh0ek8RerfLPteCt7P92ITe5Xqqo7BOuzwZr+/JcFzakCjuYJZ+6ZVDjqmTjjr1xjsi9LzPI/oIgwYdxjAly8LwTtH+M28SsK7sbuOWv8vU6HKfiz9D33cpOn/IGpn/kUXot48ZOfrfl8cXiOMpS7+Ju8F1Xpwk8yT0ztsMs/wuPA4eSuh9fg1m6T0HVNa6LAnjyMRRxh0/bld6ucQq35fHIvRrZXFt/CM0aVyLTu8IHT8tS8eBIRomcGGp0x7VR0nGqTf8n4TedWB41gH/MT6oV+bmMKYMwVknEnYS96VWcMunyz1DxzsXv3HqGZZH0LadcIyFTqdmEfqN4xxB+hKorPK8kQR9hEXKLyeeg9Dvc8+LxIzQ+Z+EnmO72aaRYf5Pueb5pYQ+k02G9f9Z/KfGNXnIPCeZZxiu4O/exninvU065NZtN+Wsjmq5K3P1lHWBsQGZM27PPgRu4sXzyQt56rxfinxX7oNOL6EXJDsa+VzjJIHbvlPern5ahP4KYvYSNE4R9BE6jX7euXgLLx7I/0UT+swVm0qnn/Mcxwb5cwydSXHMMYEEZt6lGZH0+SWELshT4ii8MSvXueNTI/OaZJP54pw2yMQ0JsbiDWyZqzvO1UOGe6QuIHO2V+UZeAWYBMqzsz1SN0dyOhV+Do9xzyk0ged75n/KzPwAJiQvl/tLhsckxhlxd5yFVwePQeh9TbLOYxPXy0zohiEDrBgIHQv9iNBn71+fPwah97UOm5Xr3PFFIctlHR+BvCS5ew9LbD9sH+OeyXTmLWm0PgN4WpgA/Om7N4BVODzTjgVgNrj56rwqu0vrrsOuRT+j0XGU5awOfO/ci4RZ7swPWYT+CkMFJRxzcixLZeZL1C9M358wjmkdudIWngbUyUMIvZVIKuYjMjeNJvTnQObLfBLOf5QesnBSHDLqdwDY5luueX4Noac8Ojzl12H3Raf1mMi20CQjzEeSjmvZv27fa7/lyTnzcmb1kXFS56hvsEhZHuue6jwvn39KJl7rDmnHyXgd37C899QzH4LOi3nAQgfssLks9BtCvwgz2Og7/BxB54syg3EuycPC84C6eQxCFyqMVOKtXFLBJIk+B2Z5J5wjhI7CZ1kmSg/LTgLJNu370HLN88ck9M7vc8oPdL4SlI+2MGsPGYd0iCPpcA6pQ7rvuXtHWr5tobfMU09xzpF0WC7L/heMmx+Vo13Wneds432NtCwHZaAd6eJ2u1aRW+UKLGfX6nO/cztI76i9nEOSOfD5f2wR+quHJOlEx2sY59r7Fl4eUF8PIXSVl+EqYxVHptNppILq60+JVHqCvKFQ2VzJdeiQAaSQy9fyHWi55vlDCF35Sh6G5wYtff8srSN0/EaSWt5j/UJAklfeY545EkdSStc2cVPm/Vza4u/bJ24pd7+10PqG/5K353md+5nZ/gH7BlfuotblbfIzjmUk33oQTt3rVx8hztxcyyNtizXv/fU1wNwNl/IB6xn4DOQo4Zufrlfbl/fauSLNXIf++k5qNtqF20QTcqPjL7w6oH4fm9A5R1n5AZ2GOwliIaHIAP+59tTHROaFI0qfXRP5VCWT4pichby0DFuOp86vJfSUfSpmwvz6Fv/JY+Z9hlm5rzlaX5xDPpAQzyVtwqlndn/0Y1CcZ7uRBLv92HZsN7Ydr3NO+l+8b/riMjYwG6rzmvJvTwoeFqzzPxsflVG2+XzzkHkjr3ZEKI/xOJdwIW5lhoy+ZRvjy3bS/IO7p4dNufh6H58+/aU72LSL/eIJ42uHv3b/BCufSWUnT/a9//P7Tp7M/metftYLzyWP5IuOA/I3z9l+DFOuwElxi9BfITSB3xemdW2anZ+FpwPyfwihZxwUCsqE/a9RTuxX/jP3L4uxSyDgP2GC83ffPyf6XEfwbjv4n/l81/3rfUkOEke6crsd9/k1hN5hkkkqZM4hV3Zs5EMvs3JdcgTWzRHYMRI5KCtkwzMZh/639+2C+ZIaa7npyNkeIHiO5p1zSTAtSsssqVpu4kA6fDqaraCZx2BnSnm2zK2LrB+v4WF5h7DObeOzZzckc/NlvVAm6vH79+9l4E2ApNmohg+gQJYz4CkgP3Qy3M/DPT04ukkXkzHdxdMtvNnFE/nzcSqWVP6J/Z3je+vkhXfQrZvttOi2ty3ZCeD76ovQXzE0wT41Oj8LTwfk/1BCB37FD0XBUiAmMvkFvNy+N3cf9Mtabjr0XEfHxTlybv6wyJFLWn1cN65t9yGEnjJUtjNySWtR5YylxqYoKP1ZuS45XoLcWKqvEUa7gWzeZhvjg7cx/sJOxH7d0fxL5oD/Er1lzHJz3Q4i1i4dCsrJM2fyTbk3mSt33PZYv6TZs9i7E9XIjhT/uR9rmA4MVi5WNkvs/BomdQxs48J3oTsk5pt8ZpsUhLmxV6blVxL5KBcdUjwAfHSFzgXeJTwRuO91/9uRQgacf8Yi9FcT1xBsE/I5HN0/U4QLTwvk/1BCN8xZ4Uw4QsGwJ3eSucpJ4uQoVGTPAfPQpI5MyH8ThPcYNmvHfX6K0Fu2SWwtb8lQomPCGAq5y3QNsh5myHc5ZQSsW8gG65JOHO7xX71/713iSAtXMqUcRx8B0mqmg0g5+aCU5WyybnR9ATsdbHVKGyVt89DP7naeHRHyznAHaXzT/qU4vn8BqQII1jZP56Pb/gxHetKyKHfR9efzaK88n44LZaUTxPc0Pm8b4/v2PAM7SrS/5XJ/hWGjOmpcHfdS9L15f4cvPC2oAxT0QwhdAkLZYZlB6FgrWOeXKODMy3McRSpPleUs74Ybl2On1efXEHparoRJPilvFDIWGBY69TYr16XHc5jFy7AkFo7UO+5x3PPfMJnUZdvKtpNtLa9B6HgicGNDVCl7nq1cM1/WWdYLMsJdzTfBtVJ1R5+DRO5cAMavv3rvtGKRA61mXeZJ4uaJMD0bTfKZ30a2sUwLZMfSujB93mnqgXfxrfcPa7FfPV+3Y7iG46fu9fV6mXZFL7z2kI1y4bbAS/xQQidMFykuvi/frXP38+9nilR4Kt6nPopUkuZLhdnXUdyvV4D7sdPr84cQutat5O5mKExEgzRzstgMs3I/1lG5zCxRLD+2VmUilxa3ZfJ/EnpDQv+h/YuPlFMCE3oQzFOWOf+Tv7fdP9vsM5157/PMI2EghznMNx1W1saTlh924Rld34Lw2TXDU2bp+TA878/yGc7/vCfj6iHgHeT91ovADnm853RKPi1Wb7zu3s7owmsP+eIs3BZ4iR9C6HnOPSg8xlCZEITF1s/L57Zyeg5kflIpgiNFbb5RmEfx+vwUoSdygpaEIgFK7Bxx++JGfcddIXe5LkWXLfOfsMz9nkso1LUueuNQTkidSXNY2UnelsUZ4y0HIKFzL+PDtE87U9ZTy94w8+Z/8vce+4Q4J+vxfP8re/LjHIXsaEjmvBt8IjrH8++LmWwtz6x+uk5AknkSuvHzv+P5kDr18ib7ZMM36KB2JhcWFm4HvMQPIXSvofxQhNz7lTF+3s97mXFEWqIVZN4zU755fimhN5nPwviPGxsLXZd7P+8x0CTT1wXXiCOpGM5/LFhWCWDV9ng5/2k7jlE7tp5tjHJ+z56GFjppe7RT1XXT59z7vrvMcu1+Wugp68wncLyfmeQ/OTowlJvjzENxqh0l+vq1uOSZXiOvWu6Ovb/BPX3jwsLC7QCF8lBCVxFqoX/VPlHo1ghdYjpSsjMFfER4fX4JoWudt8WahC4gJcjpp7wgQm+SmJWx0fH4TxvANc3yKNdH255sY86EN8w25sYqDOEw/k0b9Vk+I0k0r2W+kT3jxL9on2CXy8783/UwqwO8BUz0o7NKHUqGwHxImBzPyeshMO1Ljkdhee316ActLCzcDnihH0LoGYbSQwkz8YiZzvmVLJWdVk2jlcxTImWR55eA+Oa/w/P8GkK/hGCa0O8rwy5HQou7w7tsRyAu5MaQAMupGPdPQreT4nHWvpDRJ+2ztpFbp5/lPioLZUBGTKwjvZwMN5N3h5kn7mOSH50LOgg+M70SjaN6meXzUnhfl/tRcCdgYWHhZoBCeCxCB1gxSegqHRVrEkSet8J7DqTCnKFllzLs631+CaHPXL0zQH6M/eL+9Zvhp/J9DuSNfB11to7k0nKYgXQhdCa1uZkJyDaTHcIketogFjUb2MxWTGT76edmvolDW2StOOvGmX/Qzz6C192ClXuZt8AYtG72fnbn45zcWs6ncC6tB+NOwMLCws1AhX5fQhdaWrhVmT07c7m3Akol1fl6SrSSbCXayvTo/g7L81OEnoSWFuxM3hKehA65SOidr0vAfd3R6rwnlI+dgFP3cc51xtHZXQ5CTC9Els1wr+EKZ2kVu89hEad72/QlVOCzPVou80mn4r33GfM5Ea7l27LO/7Rtlqz99r3DSr6caNYu9mvqo9tZtrWW6Tl4T6fV8Q5xJ2BhYeFmwMv+ogi9XaQzBdXnz42ZQmwle3RPh+X5EaHralaGutaP5CyhQ45sNwqhO7TR+boEllVi7nw3Uj6SqcTZeSCeZPpz97ZBGdJKp7yu7yaMdkeYuw7SHl0nbR5NP59veOfPfNG5ZKY8wxSOm/cwxhEyr8wRYf0/WxuzkoMZ466/Nx8px3PyNE62r1l7ugam13lpTJ/TkRYWFm4HvNAPIfQMQ+Hpcp8tW5sqkJcclyjY2fU+P0XoTSAt45Z1Ejp7k59a638JJIDO8zl4X5JZkwllxUJnUxPIUHd6kriEqXXOkXbE/uRs3kLb1BrPjkM+P8MyXMuZtsj662+LSXgt15a3sJPhfzomvCMfuy/7cqtXnufM8ZRTEqv5nF3PeInZPZeg6+IIb1DvncjCwsLtgJf5MQmdSXF/+YDQfd7s/8sIFeKpfKbi7fA8v4TQZ67omayb0LHQO19PhSQNw5IscEmzHSzkB6G77tyJaZI55bFsjFMzds4kNnY6S3d71wfnSehez3BAGkys+9qdkPWMHLVrPU7Gs244p0NAO6f++AIa69IZUiB91qeTZ94l3ik6W7wHyMGOT85VmLWdI/m2DM7d6/1HaWRar7+nE1hYWLgd8DI/hNBVyhzd55qtXyF0lGgrnHPK5TnQBKDSTcUrZvKbKdY+vw+hey3DtWz54EZu/dr5nCEJbnZunpVH7kUuCG8ZJJpcSQOi44tgtCvKcrT2m/YDIPPfuXcEslPY+Zw984jASAey/ax9tr3yPWrX5knZZ72YV7wIfoaUPH/jNsYf3sb4kH0HP9bOS/LUEXlAHp03yzRrR5aJOLP2aLkvhc/y3jvvaN+wsLBwO+Blfiih5z7dWD9/bZ8w5A5ms2e2UnpOtAV4Cl0eyzILz/OHELpEnteZ2PWP9890niN0OydHhNBls0ySOPVInr2/y2ZYpsV9hHEvbvO/ExvLWD47J+7O5gdn+AQp7QcCJK18Tuc1w1v+GZd8ICfIFm+ApJ7tOf/b8eg6SXAdkHfKRp3QofWDMn9zG+NP7981/8h9Yxs+fUpnF5L3M6rki/yJtuzzP/VgJyvlfkoWDd/5adyOvLCwcDvw5X4IoacChKRwuaOQUVoqobTyzhHLU4L8+BlQ8sl4r/mdyaphOk1yfX4JoYuZjJMI6UBBStQT3yuHGJK0ZzCf/LfM/j9XN13WLG8TCufKjyN5Y9kZM9Yh7LTOJUvKw/auP7jPIMeqhcS6DmbPz/CMa7j5o1ykyS5vfz8+GNOyblKf1U/XC0fnBbi0zWVukDv1JNh6Fs8K1vyXbGN87jbG797d9h+0jfFeu9eFT9HSEWJyKZ4KyZ/3VDLPsjt233XR7TCvTeXWERcWFm4HvNgPJXTiYp1gpaDA/sY2xluWJcJuYSgkAXHyPMAYMPD/Ux4B+XF/a/IpmbQybAV5RDDGzfNrCL3hpCzjSh58LYuPn/zISbnOHROSBde0xv0qmB2CJvyUQZZVsiEN5cr3ubGIGXem/VAeyE6PDkvJGNt+/53MtcyV2Uzes/AMA1lf5on2yBfH6GBA6D1BLnFJ3RyB+nEIQe9VgziQv3vEM4wCWCvPjnSQPsNXn7+N8Sn7u8nsej6L+ha7rKg737Gs0/ZuIAfrptvmG+BOwMLCws3gMQjdcF2U37WN8TG7m5HvYrNLWOPXbmN8WODXPNNRmB9mY3/w7mFAHqfIKwmmlWSfP4TQJR2XWyFr5Owuah8xKVcekTdHwPexqZMP3cv5Afv6bMZ8sQp/7N5BsGMjuUvoWWZBuGPdEgedA9J4+90idqxZopPEWGf+m/bxZiaTcQ/3mnaSugTdsp2F9XUnpVGnfMMcbwBuca3w7DAp466HI9j2c0gh3xWfwVE3vf856nHRXZ+b2NAJ4jodIuTFEdmx/I4JeXROPm4v09ttY7zxTvB0pqgTZXlKPm+AOwELCws3g8cmdI9YQCptiAewKYeuR/4b/twgL7hC+Y/V++3bGD97t3rSqkmlyP8XTehJCFp0XtNdrDy7TImj61iCuLohNgiCT4tKEr93J392eMP16/ftaSO0FYhCK1BL3rJKnOB37C5m5Iv1yXP+7jbG5+wdijff3cozq5L/RyslUv4d3vGznngOXgPKCFkq2yb1bOun6sj66XvSQtfD0vf43Hy3Zu+XaeXnXvXSuISOuqQjTbl4h2lfdM5owyA7ZymzO7gTsLCwcDN4DEJXWamksC5UNhAHVkeOK6Y1khbJc0FLiPzSEWGyGQpRRXiK0HVBN5H0+UMIPZV6yjwtu1NQ/tYBxCDZZBrIwPrgqPuX75lDFFjSWPISMOXIsduUiVY77ek37t4avAFshMNQjJ0DiZw0WrZp9ac8JWe9Bn1fyj3jAyx1vABsMkNnJtfGp9yP2voMSfxN7sCwGbiOZd+kT3ifCyfh2cHzIzbUGW2YuqST9qX7p2t/wm61t8dFGb6BvFp4CwsLt4PHIHSA0vKa44YolrREjKviE53WUyPzjoKHxH7OTuhHLsu0EI+u5/l9CD3zp/eD8/7f8Y9wVHcQAziqJ65BGhA8281+0T5EAVHgJmc+BATteLuysaxYxLrSAeE5Fp9LuWbts+V5LaGnl4UjxEae6KDQ1iHDLrvySpn19ZRpx81zj9zfafT5EfJdybQNt0MAcmyeDup37CsH6MRQbt5z54nckVcLb2Fh4XbwWITeOEXYM8X2nMgyYeVgueFqhoTS+mzZgacg9BcNx3XNS9cxdeikR8iP9gFZ4DpnshZjt+7dn0TLf8iacGTJeRK+53dI5UKQTst5BvJAPPOH/GnvkNsn7J0VymPZIUTbehIl/+34NMEqq5ZdknnLXdhxmr0rM5x7F+2EUWeWzc7YJ29jvFm07ewQva6tt/AWFhZuB49B6Cq8VlpHSirjdrpPfWxg2UjoWJ2SwRFxSE59vc+vIXTzNpOp4R3/vuD+rifD87zH741PGRgjx7XLmK2TsST2lpdhErkE3/FeBJC79WVHjQmAvycsdfebd47CTFbWgUMWKSvRdXQtug76WuerYQckQV4pJ1vqvuf+XXfee2Ti0NI/00JbWFi4HTwWoTcpXIpWTs+BzA9KnfHHn7eTk4q/5Zbye2xCP4e8p8tyLTrtDqdOeZ4z7b1ufdNOnGTHHv6/qIYqKLNHZTCTy4uE3gD+W1+2eTofkDobzrD5DZP3XF4HAdq2W07WA/HseGW9eF/Xb8v3PlD2R/kS/V6aH2fJs6KDpW+897bhH9bCW1hYuB08BqGnAumwc2iCeW4koTM2PLMyW34PJXSe23JJNFnM5Of/+xzPwWcnOXiv4/muamD+AcuoHKsFM3kot1OdpRcBvQda6ZxTz0waY0OXP757aHgHKDflS+JU3l7TJW/n5hTJem+i4zwWMu38j6eFNs7yN1Z3MFmRsr9+rkgLbGFh4Xbw2IR+RDwvM7JsEjoud+RxyoJMUpoRVp4fEXrnJfPk/1NybYI4VT/3uYdrkrb/Ia28104JZOH4Onu3v3V0ipK40/X9VISuVZ7n5MF6Io+QGh0RdrZj4h/E7jpwyszRoYeWWVrDM1JveZ+T/bnrR5jdY315naN1RUeM5YOQ+hpDX1i4cTyU0Pv8iHhmcV82kL9bI3TjHtXPDNfG99kZ32V0uZzOa5AgFuBXbGO8UyxxS/I+8my8KDShk5882ungnK1WmeTHSgd2aWOOAMRHmZhj4VK/nFeQstK1nbK7BtfWz+w+ztvdnsRuGJ0vPinLcsLXzX5vwS0sLNwOHkroCRXZTIllWFsyrcCeEp1PlDXjqDOX+4x8joipz68l9MZMpqLLdC1IY2ZVZvo8P5e3JbgOwRnX+/xAybvsbUt3t21Okm9ZvShI6jOvgPXomngmiUHsWK5vuo3xftsYf2gb4+v28WeGFpxId2S1N9KK113Pvf7v9+IU8llH95huxre++E9+6KQwEfDzdu/EP9eCWVhYuB08JqFL5olW/o0kqnzWUx4TEHqPoUs4M+J5KkJvzPI+C2sQp3HqOmFZR/x3IxTqT2u10+Ea1ixkwd7+fGUMeUKYyAI5aBW3rB4bR/MgWMFw6jp5syMCwTNJki2B+fY5Y89/ZP+yIATPeDRlBVi9HHNDJY9uAOOGP27k44x5vR6S8SVEn9eyHuww6EWxTiV1Jzq6AdR7MKGxhbCwsHA7eCihd5j/WQPbCqbR5G/YUx4lJfJJWLvcJfRTpDMjpT5/CKFTF1kPHlXOHb/hPcSVIPpa16FpIxOveW/W+YxsuEe4VOqrtjHeqix10bJ6alxSv3ZC2GmOMrCOG4uWWeLMFeCDKb903xWPZXBMrmPIAQ/F9+xrwN1eWCAXyNSd3pLQJXXbp/9tt8rZdpvvq3XEMdPKezMNrmOp44H4MV34hYWF28FDCV2l4P8kSBQFCkvLRED2HfacUJGSL8r+j7YxfmbtptUKPy3zo+t5/hBCT9knKXc5jpBWoAre73dLFll/krHPzjxY35JJtwnCOw2OtAP2b2dsOvfI7/b4HGhC97zDExI8dYmlr5uedwhQRgifbW7xTjCDno/g/PL9Yzms2/9d2xh/YCf/L9jG+AvbGH99Xz5HJ8DZ9mn5Q7zWJcccx6cest4AcexwzQhd0AbYx/8du6ALCwu3g8cg9Lb6JAmUkGN0WCFCV6Pnuc/4Ux/JB+WFXAnjPy5UlC8uVsk6lbsk/tiEPpOt4VrpWQeQsoq90eW0rO5Zr1WYZG7HxmceWd+Ztz7PDofXtRQhpE/cia4nyT0njurWTsesfjuucG4AljzvlJ+klehpU1j3fjTFz58CxuydkMfX55ioRseSTgDv5afvn1OF7PEi0X58v5B1W+n+z/oR+V5bb7T9f6cLubCwcDt4DEJXaXuOe5FlS5+5W2WfsX8TG/Cf8M8KfHadPyXIyx/d/5OPT9vG+P3bGD9+V8pJ5ir1VvIzhd/n1xB6ytJwwlL+ECQzr7Hs/tie91OgjNQFs7b/zG4NMrbN50vxSJCW1qBjvDwjn5kE33kUtBtdvBlOfLYfJW2+ZAfJKZOXCZK0Y/znSN17OsxwQBpOxsu0tewBwxC0N79cZzuxU0AnCKLH4qdtsoHPp+4ufeqODppytvNnm+k6sk0lqG/S+KNdiIWFhdvBYxA6YZA61h1WGOOlfLgD5aP1oTXCxzy0RlBSwDjPCcdDAd+UditMgJzSCmsFnmSfYXl+itBbrkdk6TUIkyOeBCYyvdGkPJeC8r7tvkTrN+zu32/d8wb5pms389UueSGhdxmIxzXaFq5dtonl+S2n54aE3vWd+fS8482QHYKjcAlcSPKeQ/a8nxJ/WvvUH+P23xueGGQ961R1fSSoZzpz39ACWVhYuB08BqE7LsuYLISO5QcpQpIooFZqWiZYJFolqdCeGuRJpQmR8x+0nMx/k1ArfMPy/IjQcyxaeUKG6crWA6LFxRGLiklW77B3khzLncFnWq4kCz+eAjnQ4WJ/byzAX7F/MpW2QJ22tT5D5jMJPfNNWuAP75068o5MU1bPiSbrrkfjNEFL0mmJn4Lpcsx3pJ8P+vmCa47VsxkOY+6+h8q9O1anQP395/2QhYWF28FjELrh3ANJsac3y3ucJd7PzGfPFOZTQ6WZyjaVqXk8Ush5Lvr8FKG3PGeK2HPlzBgqQxs/fe+EdJkuQZaH/JEOoC1A8P/GNsa7b2N8yT5ui/XHuD2dCUlaIpiVo9uGpE77+qFtjPfd91FHHp2350LXcdbjrF1cQ8CNTD/T6Oc2dMsTl/akd4khLUid+lHWYlY/3fninn/aD1tYWLgdoDgeSuipNBiHk9AhB9f6vsxIJdwK+UihtzJvBdznDyH0rAsnrUGu7GDGxKlrCX2WtwzLMVwsQMZuP2b/rraTGCX0JoWEbUUy57+uYNy7zOam00D+z5HYOZy7N9M/9awm9KNr3WayPZxK/1rM0sln8H7xfLwdH7p3lOh0uZJhNvwB0puSExf/p37YwsLC7QCl8FBCTyWBomYM/UeHos5n5fEW0XnnfKb8+/wSQj8l24yD8sWtymQ2t+zsfF4K858EZVi66iEMZlwz/g2puymJSAu8ywJRcHQ5I2XmfiZzfdLeaXBtOnJSVrbNWZ67XZn//N/XdWsDO5pcy6GXdH2bTt5nHtO93vm7Fl2eGcxDhwPCmTj3C3fPDfLWazIj84bv+us2DOrEFxYWbgcqzYcQukpaQmdpDVZdjkMncVyiwG4FlqvL0+eXEvqRfDsMcpTQUeb9vGuQdTJDWus8D8uaNpLWuWSdedWKdxljkr5E813bGP/m7uLP4Rn+H5Wp2491kP+T/JKMAWWhvRvHcIn96LnGeex2PEun5Z9lyk6O9+Fy/8Wx54DynXmAjkBH4H/szC0sLNwOUAiL0O8Py9Xl6fOXmdBFkkgSIOda6tTru21j/L29nWT9Zz47z0n+hrlOnpn1EJJDBynPHF+flTHzbFiSn3HSA8CYMx0I2jzb0TIxs9NN8p49N+NkHmb56OuzuDMYhzTIfy5pszyAMrC2/XcHoafcrY9uX+1NoQ7/m87EwsLC7QCFsQj9/rBcXZ4+f9kJPUmm64m8c4QEIV0IkW1OaSd8pKRnwEvuwDFcV0KkJQ/x0F5wvb//3v6ybTQZdr7yvMtiuHEoA3JnNvjH75MJ3bXOWeauAOg0OW959bMSszyfQqc5w1Fa5Jk6YVUJnhOHQ5Bvd6ASeU3XPMfv7AcvLCzcDlAUi9DvjySPDs/zl5nQjwgor1tG8s/MdMDWpRA6y9CO2ki7fCV343NOWfjICfsWSOo8xzHqGbo9dZkE10nLHds+bBvjB3fZfeH+kZW33ImdZzvLnzrSQu80G523zFei7wNHsu/4fS7IM+8aGyLx7jl+bh0g3/x/CtTDl/YDFhYWbgcoikXo94fl6vL0+a0RescBlhPXLy5eVjJQ17mZifmVJLJMnkseths3NWF/c4gVF7J5gWCb5DqvR/k1z8gc7wJgH3UInTaOe5oOyTfvS74+YBvj7Xf3vwSvBSxmFnznJfOb6Lw1Op2+bnnIl2DfAD4GQ1uyHpRrHpW/qwz4n5Y5II3f2Q9cWFi4HaBEFqHfH5ary9PnLzOhgyagvt5xKQMEyTau3x8kLVGTR8I4Ukbd7V0OrkFEXGOtOxvlOJaek8FmBGdej64T5pgzaULSH7HL3Q4HpO7e9ngavnvfUOdj993zWFYnwUvobtajB6GJuNH5ynynzLs8wjZDPbuRDN4MNv/hi27kX7LOTlO/sxmn64H3/Tv5hkFndmFh4XaAAlmEfn+kYu7wPH/ZCR0kqczC+Z9EQ/1CMOwPz3IpicQ8SppJLrQry6ylSDikjjzYm54tYZGRk9Ukz87vOSQhkle8CmxvC3HbvrVShdunArbW/drdev+ovc4gePJHuenQ6KYnfd4hjgnKQFl04btLYsIdE/M+0iRtvBU8iyEO3qmfvL+jvGN4GvzITnaeksD9n+XsNgXJI5OvZiy+hbiwsHA7WIT+MLxKhD4rx1G4dcmzIRnIT0uR/Op+l7ST6JNwMpwyQSxY/X7pjmdpZSvrzt9ReyKuVrQE+eurfTfIj94EJ+0Rn3zhnmd2P/ss8FEfNtthMh918Ga7JZ/fJtDNr3tctz3vmiCcOGyB645vvDvsdY/7n3bya/bPrP7VfSc4Z7KzF4FyzvxnmxK6443D0XNkwTbCdHb+tRbiwsLC7WAR+sPwqhO6dTYjUsKwLHH/fnK43CV1/tOOjty8Wo3EMR4k9eU7sdEmeY6WbeYv83NE9Jl30kJOuNyzfc/Iz7Zsh4NZ4/7nviR7t+Blhvlf3t31fNUOAuZTsZD+h++k/MHbGB+4j9Xzn53dGNP/9xm73r+ehrfjz+/fQ2BnPr+J7tfvzMdMnmDWcfI/+W4LHtBZYbiDPfx/eAtxYWHhdrAI/WF4lQi968WykecezzYuRIvV+RN3YpttC6uV3mWQNHMyHeTCZ1Y/OibEkRfzkXkwvNHlIYy2iJwgUOR+ZKF3/rJ+yKtkTsfD/+5v72dnAe8B3yqnPPz3ozS8W1r8fU33uSAdnpPfsOe8ZWn7yPxmW0K+1kfelx2T3757FX5YN4qFhYXbwSL0h+FVIvSG9aXLuyeCWXbKg8sYC9N10JII5TsidCD56xImLuT27dsYb76TukSezzcPudlK581y8B9PAmlhLf+T/Tkzuc7Q+c93Idu+sCNj3TqzPO+37FrdeijSCvc824jwnixHd0AyvK17rrkvP99e+HF+HbEbwcLCwu1gEfrD8CoTepJ2ErvnxuM/E7feeZ8pTd5ybFcS6TJ4jWO65SF3yIblWOwhzxhzEnm2oz5mvrMcR4R+JPPE7Hreewodt+/3XBnZech20QSvfDsNOxOdV/fdJ67papkz94HNdpAx7+s/241gYWHhdrAI/WFoMsnwPH+ZCd366DQMayKdlZcyYeH9/p0syN8s3w1JzLgSEoTO+DRLx2iXPFNSz2Pms/PtOXEl9B5DvySPR7C+0vLV+hXU79G7Y5gWvKSth0MLnLgz61vLu/PVcamLfJ5hyJdxfpfkvU6u3TgWFhZuByi+Rej3h+Xq8vT5y0ro5+rl1PUkeMoFMfzUsNLJZ5bvqCyE6XJWBrruv2gb443iOcjOpV/KtJF14n/aYs5yl3g7LzNc8g709Y43C0/L+yidfP4M2WHoawnG3uloWR9st/vpjpvvckOmi9AXFm4YKDwJHbcbk5FmhO7/Pvc4I3R6/fmcJotXBefKJqnwX1LiU6QQeirdc0o5IaG/005Up55/CqcIWyRxH4VbLlzkLOlyYpcW94zQRBJ5usK5H/c4S8NYh61lbqfoHKEnIC3aN1u9MumuXdPd8RCz/IJ2i2c8w4/KO3tWxpul1eEp106rkcMZTNzj/WY2Pe9ofpjmdbJqYS4sLNwOUH4oSMgXC4vtNyX0VjytnPK/1gaEzgYVfg/dMdcZUbxqSGLkvI+SEdBCT6U/U84Z1m7UH9jG+CkPJHTz99D7LRuT45jxzu5xWIGWS0vSvHdZZ3Kwg/hN2xhvsXsiJHGXsfHMzHuTuZ0ACJ0hgd+4t29d2srUY3dAZnXQ70Xnv69di06jzwX5IL+66w3vzgpA5ljp1AlzE1jnjkyQzRvUZ1fuwsLC7UBChxRwv/3WstBVECoJ/2uhdLgWOoROmlpSDyGMW4Fk3WVNouc6ZDSz0Fu+yrjjUDe4pFkm9hiE/hBIoNQzZcPiox2xrtolXJbL/Et8kMxRGW1bWumfEu5hXcSzzqKdkyZ2ZESHlbXfkFqOTXe+mswzjzPS7vvyev/v6/cF+clhCifLcc30iUM4bYUldN+7e+DY/z29Z2+AOwELCws3BZQfChmF95t3oslxvSNllUDpcQ+dgS/blYYWgMhnal3NCPBWYXk6PGUgob9nEHrLt+Xc4ShyXKfMUH6Xl4TQrUf+Y0kzts9mJbSHLIOWOkhLfVZuSYlOItuckmbuIAdmpN6gbQPuZaMXNmvB7Z55yM7pLB/ZzoVxO85TwXzO8s27CFgCSHnZUpfOH++4HaNpu2nhLSws3BZ4qbGsUHgQupOGWoEIlV8qNsB/LAEsdK0AiawVB2Eq2ib7WwWeiCZ0rfIkdMr8XjEpruXY8uXcMI6QEIr6HzzCGPpDYfmy3NQ77m12j3Ob0iQfO4szyzzLn+UmjT+1j/siPzsPutRnbSzhLHd2aPuuXfbI0CVgPPcSck7iP7rHfIu+fi2yszN7HvnxGuVB5rjX2c71G/fNdNh5j73sravDjlALbmFh4fagBaOF7naXKqRUUE3meS6hO4Z+RNYSwatE6BJLhjXhQUCUmTF0lg05/nlK8avEjUN8lDYud9Z+Pzeh21HJPFD3eA/+/t4mkjSzTblGWiSZZzjkS7v8VXt5eR6ylNB59pEMCNdVj3X6S/ZJYRA7dYAHwDF190c/Is8Mz87JKTQhH6V9BJ6R8sj3EPkpU/7jXsci5/vyzBdgrPz1a8wnhN6yuhuwsLBwc8ANrEsSxYliQ0moLFAerovFChCp0IiD4v3KySz3GbRojxTxrWFG6JKd5QQQOh8gYSxXhQ2yY6S8s9Pk+ctkoQOfnWWnjFrpELqz3m0rth1nwidB2bZSFtxDmfn6GR9CcW16WppHMrBeAJY6+aJ9vvVuvf7xbYyv28mdjhLueMbtIXryR5hWrx1dibXJ9z64lOCte+YlKM/cOpYhGJb5fcg2xlsGkU8nv03q7HXoCAsLC7cDLUgUJIqO70BDNCgwyToVK2HOmFUpA/ez5otUf3FXmCrdfqbg2qs0Ya4JXes1w5E1ChZC/8e7nPPjH+0BmYUhexQ448pMrntZCF1QVspIh45xbyZjJTHPPA7ASV5J6BkPWUG6H7eTla73zk9D+duxsvOK3DgyroxL+iftH0/hwyrMA/m2vY7o4Nop6Y5X1415PoW8Z2Z5H8VFPpI4w2LkDS8D3gY6Jm8bX3mjbFrllJ260BtGuKsF7sivhbewsHA7kHR42VECfBWKL0f93V2h8cUn9tUWhH3Lfv1bdxAG+M8SIywelCRp+ow7iiOe3eG3CsqS5WxCl1SQC65yZJUyRNYtb2XudTZtQfZ/axvj67cxfsKurGfyfSp0HVpWykk7+F37WK55h+C/ey93ls82JCy/933zNsY3bGN86f5dcttXYiaHbmd6hqwL8+tadQme/c3pMDHuznLOz9jG+Au77PGOQPR+OAXkx1Xs7ErETfpHyE6NH3nBY0BH+ft2DwUEzhfa2LKVJYJ2nikLsGwOR9hp5j+dGeUwk9/dgIWFhZuDLzzk4PeYwY8JdBj/32Q/omDfdBvjjXcrITesUIEeEd5MCd8ijjoukkkSC3Lms6PIDfkhN+XrecqZI7ImPv+Zo4CcX8Y5CBKkBGKbIs9ZHsuY5Ra2K0G5iU8abDLT3h9lb3s6qgfDjSs4p43Sbv1WuV4GZu3/8H1SGTKH7PlwDLPG32cb41fuQ1WftO++9id34uejJ39z74zQgWHOA25xPCt4GvCEQdSE0UHA2qYzzX18hpW0IG46FMy58AMqdDjoeIC0vI/Qcujyv4Gs/v/20tf8Ixl0LwAAAABJRU5ErkJggg==" alt="FRS" width="500" height="201">
+
+        <span class="eyebrow">Rhein · Elbe · Nordsee</span>
+      </div>
+      <h1>Pegel Live</h1>
+      <span class="river-tag" id="riverTag">Worms · Mainz · Oestrich · Kaub · Glückstadt · Havneby (DK) — je Fluss flussabwärts sortiert · plus Wind &amp; Wellenhöhe Helgoland/Brunsbüttel</span>
+    </div>
+    <div class="status" id="statusBox">
+      <div class="status-row">
+        <div class="settings-wrap">
+          <button id="settingsToggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="settingsPanel">
+            <span class="gear">⚙</span> Pegel ein-/ausblenden
+          </button>
+          <div class="settings-panel" id="settingsPanel" role="menu">
+            <h3>Anzeige</h3>
+            <div class="settings-list" id="settingsList"><!-- Checkboxen werden per JS befüllt --></div>
+          </div>
+        </div>
+        <button id="themeToggle" type="button" aria-pressed="false" aria-label="Farbschema wechseln">
+          <span class="labels">Hell / Dunkel</span>
+          <span class="track"><span class="knob" id="themeKnob">☀</span></span>
+        </button>
+      </div>
+      <div class="status-row">
+        <span><span class="dot"></span><span id="statusText">lade Daten…</span></span>
+        <button id="refreshBtn" type="button">jetzt aktualisieren</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+  <div class="grid" id="cardGrid">
+    <!-- cards injected by JS, in ascending Rhein-km order -->
+  </div>
+
+  <section class="helgoland-section" id="helgolandSection">
+    <div class="helgoland-head">
+      <span class="eyebrow">Seewetter</span>
+      <h2>Wind &amp; Wellenhöhe Helgoland &amp; Brunsbüttel</h2>
+      <span class="river-tag">Aktuelle Werte &amp; 48h-Vorhersage — relevant für den Halunder Jet (Helgoland-Fähre)</span>
+    </div>
+    <div class="helgoland-card" id="helgolandCard">
+      <div class="glow"></div>
+      <div class="helgoland-stats">
+        <div>
+          <div class="hg-stat-label">Wind Helgoland</div>
+          <div class="hg-stat-value skeleton" id="hg-wind">— <span class="unit">kn</span></div>
+        </div>
+        <div>
+          <div class="hg-stat-label">Böen Helgoland</div>
+          <div class="hg-stat-value skeleton" id="hg-gusts">— <span class="unit">kn</span></div>
+        </div>
+        <div>
+          <div class="hg-stat-label">Windrichtung Helgoland</div>
+          <div class="hg-stat-value skeleton" id="hg-dir">— <span class="unit">°</span></div>
+        </div>
+        <div>
+          <div class="hg-stat-label">Wellenhöhe Helgoland</div>
+          <div class="hg-stat-value skeleton" id="hg-wave">— <span class="unit">m</span></div>
+        </div>
+        <div>
+          <div class="hg-stat-label">Wind Brunsbüttel</div>
+          <div class="hg-stat-value skeleton" id="hg-wind-bruns">— <span class="unit">kn</span></div>
+        </div>
+        <div>
+          <div class="hg-stat-label">Böen Brunsbüttel</div>
+          <div class="hg-stat-value skeleton" id="hg-gusts-bruns">— <span class="unit">kn</span></div>
+        </div>
+      </div>
+      <div class="hg-meta" id="hg-meta">Letzte Aktualisierung: —</div>
+      <div class="hg-charts">
+        <div class="hg-chart-wrap">
+          <div class="hg-chart-label">Windgeschwindigkeit Helgoland 48h · kn</div>
+          <svg class="hg-chart-svg" id="hg-wind-chart" viewBox="0 0 320 130" preserveAspectRatio="none"></svg>
+          <div class="chart-tooltip" id="hg-tooltip-wind"></div>
+        </div>
+        <div class="hg-chart-wrap">
+          <div class="hg-chart-label">Wellenhöhe Helgoland 48h · m <span class="legend-dot thresh"></span> Halunder Jet stellt ein</div>
+          <svg class="hg-chart-svg" id="hg-wave-chart" viewBox="0 0 320 130" preserveAspectRatio="none"></svg>
+          <div class="chart-tooltip" id="hg-tooltip-wave"></div>
+        </div>
+        <div class="hg-chart-wrap">
+          <div class="hg-chart-label">Windgeschwindigkeit Brunsbüttel 48h · kn <span class="legend-dot thresh"></span> Brunsbüttel wird nicht angefahren</div>
+          <svg class="hg-chart-svg" id="hg-bruns-chart" viewBox="0 0 320 130" preserveAspectRatio="none"></svg>
+          <div class="chart-tooltip" id="hg-tooltip-bruns"></div>
+        </div>
+      </div>
+      <div class="hg-note">Halunder Jet: Ablegen Helgoland stellt bei ≥ 2,3&nbsp;m Wellenhöhe ein · oberhalb 20&nbsp;kn Wind wird Brunsbüttel nicht angefahren.</div>
+      <div class="hg-err" id="hg-err" style="display:none;"></div>
+    </div>
+  </section>
+
+  <section class="precip-section">
+    <div class="precip-head">
+      <span class="eyebrow">Niederschlagsprognose</span>
+      <h2>Regen im Rheineinzugsgebiet südlich von Mainz</h2>
+      <span class="river-tag">Tagessumme heute &amp; morgen je Region — diese Mengen laufen mit Verzögerung in den Rhein und beeinflussen die Pegel oberhalb</span>
+    </div>
+    <div class="precip-grid" id="precipGrid">
+      <!-- region cards injected by JS -->
+    </div>
+    <div class="precip-note">Werte sind Punktprognosen für je eine repräsentative Stadt pro Region, keine Gebietsmittel. Quelle: Open-Meteo.</div>
+  </section>
+  </main>
+
+  <footer>
+    Quelle: <a href="https://www.pegelonline.wsv.de" target="_blank" rel="noopener">PEGELONLINE</a> (Wasserstraßen- und Schifffahrtsverwaltung des Bundes) · <a href="https://www.bsh.de" target="_blank" rel="noopener">BSH</a> (Wasserstandsvorhersage Glückstadt) · <a href="https://www.dmi.dk" target="_blank" rel="noopener">DMI</a> (Gezeitenvorhersage Havneby) &amp; <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (Niederschlag, Wind- und Seewetterprognose) · unbereinigte Rohdaten, keine Gewähr · Prognosen nur an ausgewählten Pegeln verfügbar · automatische Aktualisierung alle 5&nbsp;Minuten
+  </footer>
+
+</div>
+
+<script>
+// grouped by Gewässer, each group ordered ascending by Fluss-km (flow direction downstream)
+const STATIONS = [
+  { id: "WORMS",      label: "Worms" },
+  { id: "MAINZ",      label: "Mainz" },
+  { id: "OESTRICH",   label: "Oestrich",   threshold: 55, thresholdLabel: "55 cm · Fähre Michael stellt ein" },
+  { id: "KAUB",       label: "Kaub",       threshold: 55, thresholdLabel: "55 cm · Fähre Lorch-Niederheimbach stellt ein" },
+  { id: "GLÜCKSTADT", label: "Glückstadt", threshold: 334, thresholdLabel: "NW -0,4m Elbfähre kritisch" }
+];
+const API = "https://www.pegelonline.wsv.de/webservices/rest-api/v2";
+const REFRESH_MS = 5 * 60 * 1000;
+const GRID_STEP = 20; // cm, background scale (20/40/60/80...)
+const chartStates = {}; // per-station scale info for hover lookups
+const stationCache = {}; // per-station last-loaded data, used to re-render on theme change
+// declared here (not near their render functions) so setTheme() can safely call
+// renderHelgolandVisuals()/renderHavnebyVisuals() even on the very first paint,
+// when system dark-mode triggers a theme render before the rest of the script has run
+let helgolandCache = null;
+let havnebyCache = null;
+
+// --- Helgoland Wind & Wellenhöhe (Open-Meteo, kein PEGELONLINE-Pegel) ---
+const HELGOLAND = { lat: 54.1793, lon: 7.8880 };
+const BRUNSBUETTEL = { lat: 53.8926, lon: 9.1385 };
+
+// --- Ein-/Ausblend-Einstellungen (persistiert in localStorage) ---
+const VISIBILITY_KEY = "pegelLiveVisibility";
+function loadVisibility(){
+  try{
+    const raw = localStorage.getItem(VISIBILITY_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveVisibility(v){
+  try{ localStorage.setItem(VISIBILITY_KEY, JSON.stringify(v)); }catch(e){ /* Speicher evtl. nicht verfügbar — ignorieren */ }
+}
+const visibility = loadVisibility(); // { [key]: false } nur Einträge für ausgeblendete Elemente
+
+const grid = document.getElementById("cardGrid");
+const statusText = document.getElementById("statusText");
+const statusBox = document.getElementById("statusBox");
+const themeToggle = document.getElementById("themeToggle");
+const themeKnob = document.getElementById("themeKnob");
+const settingsToggle = document.getElementById("settingsToggle");
+const settingsPanel = document.getElementById("settingsPanel");
+const settingsList = document.getElementById("settingsList");
+const helgolandSection = document.getElementById("helgolandSection");
+
+// --- Sichtbarkeit anwenden/umschalten ---
+function applyVisibility(key){
+  const hidden = visibility[key] === false;
+  const el = key === "HELGOLAND"
+    ? helgolandSection
+    : document.getElementById("card-" + key);
+  if(el) el.classList.toggle("panel-hidden", hidden);
+}
+function setVisible(key, isVisible){
+  if(isVisible) delete visibility[key];
+  else visibility[key] = false;
+  saveVisibility(visibility);
+  applyVisibility(key);
+}
+function buildSettingsPanel(){
+  settingsList.innerHTML = "";
+
+  const riverLabel = document.createElement("div");
+  riverLabel.className = "settings-group-label";
+  riverLabel.textContent = "Pegelstände";
+  settingsList.appendChild(riverLabel);
+
+  STATIONS.forEach(s => {
+    const item = document.createElement("label");
+    item.className = "settings-item";
+    const checked = visibility[s.id] !== false;
+    item.innerHTML = `<input type="checkbox" data-key="${s.id}" ${checked ? "checked" : ""}> ${s.label}`;
+    settingsList.appendChild(item);
+  });
+
+  const havnebyItem = document.createElement("label");
+  havnebyItem.className = "settings-item";
+  const havnebyChecked = visibility["HAVNEBY"] !== false;
+  havnebyItem.innerHTML = `<input type="checkbox" data-key="HAVNEBY" ${havnebyChecked ? "checked" : ""}> Havneby (DK)`;
+  settingsList.appendChild(havnebyItem);
+
+  const seaLabel = document.createElement("div");
+  seaLabel.className = "settings-group-label";
+  seaLabel.textContent = "Seewetter";
+  settingsList.appendChild(seaLabel);
+
+  const hgItem = document.createElement("label");
+  hgItem.className = "settings-item";
+  const hgChecked = visibility["HELGOLAND"] !== false;
+  hgItem.innerHTML = `<input type="checkbox" data-key="HELGOLAND" ${hgChecked ? "checked" : ""}> Wind &amp; Wellenhöhe Helgoland`;
+  settingsList.appendChild(hgItem);
+
+  settingsList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", () => setVisible(cb.dataset.key, cb.checked));
+  });
+}
+buildSettingsPanel();
+STATIONS.forEach(s => applyVisibility(s.id));
+applyVisibility("HAVNEBY");
+applyVisibility("HELGOLAND");
+
+settingsToggle.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isOpen = settingsPanel.classList.toggle("open");
+  settingsToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+});
+document.addEventListener("click", (e) => {
+  if(!settingsPanel.classList.contains("open")) return;
+  if(settingsPanel.contains(e.target) || settingsToggle.contains(e.target)) return;
+  settingsPanel.classList.remove("open");
+  settingsToggle.setAttribute("aria-expanded", "false");
+});
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape" && settingsPanel.classList.contains("open")){
+    settingsPanel.classList.remove("open");
+    settingsToggle.setAttribute("aria-expanded", "false");
+  }
+});
+
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function setTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+  themeToggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+  themeKnob.textContent = theme === "dark" ? "☾" : "☀";
+  // re-render everything that used hardcoded CSS-var colors baked into SVG strings
+  Object.keys(stationCache).forEach(renderStationVisuals);
+  renderHelgolandVisuals();
+  renderHavnebyVisuals();
+}
+themeToggle.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  setTheme(current === "dark" ? "light" : "dark");
+});
+// respect system preference on first load, but keep it fully in-memory (no storage)
+if(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches){
+  setTheme("dark");
+}
+
+STATIONS.forEach(s => {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.id = "card-" + s.id;
+  card.innerHTML = `
+    <div class="glow"></div>
+    <div class="card-head">
+      <h2 class="station-name">${s.label}</h2>
+      <span class="station-km" id="km-${s.id}">—</span>
+    </div>
+    <div class="water-name" id="water-${s.id}">Rhein</div>
+
+    <div class="value-row">
+      <div class="value skeleton" id="value-${s.id}">— <span class="unit">cm</span></div>
+      <div class="trend flat" id="trend-${s.id}">wird geladen…</div>
+    </div>
+
+    <div class="chart-wrap" id="chartwrap-${s.id}">
+      <div class="chart-label-row">
+        <span>VERLAUF 48H · SKALA IN CM</span>
+        <span><span class="legend-dot"></span>gemessen&nbsp;&nbsp;<span class="legend-dot fc"></span>prognose${s.threshold !== undefined ? '&nbsp;&nbsp;<span class="legend-dot thresh"></span>fährgrenze' : ''}</span>
+      </div>
+      <svg class="chart-svg" id="chart-${s.id}" viewBox="0 0 640 200" preserveAspectRatio="none"></svg>
+      <div class="chart-tooltip" id="tooltip-${s.id}"></div>
+    </div>
+
+    <div class="foot-row">
+      <div class="gauge-col">
+        <svg class="gauge-svg" id="gauge-${s.id}" viewBox="0 0 52 220" preserveAspectRatio="none"></svg>
+        <span class="gauge-caption">PEGEL&shy;LATTE</span>
+      </div>
+      <div class="meta-col">
+        <div id="meta-${s.id}">Letzte Messung: —</div>
+        <div id="forecast-meta-${s.id}">Prognose: —</div>
+      </div>
+    </div>
+    <div class="err-msg" id="err-${s.id}" style="display:none;"></div>
+    ${s.id === "GLÜCKSTADT" ? `
+    <div class="tide-events">
+      <div class="tide-events-label">Hoch-/Niedrigwasser · Wasserstandsvorhersage BSH</div>
+      <div class="tide-events-list" id="tide-list-glueckstadt">lädt…</div>
+    </div>
+    ` : ""}
+  `;
+  grid.appendChild(card);
+});
+
+// --- Havneby (Rømø/DK) — DMI-Gezeitenpegel, kein PEGELONLINE-Pegel, eigene Karte ---
+{
+  const card = document.createElement("div");
+  card.className = "card";
+  card.id = "card-HAVNEBY";
+  card.innerHTML = `
+    <div class="glow"></div>
+    <div class="card-head">
+      <h2 class="station-name">Havneby</h2>
+      <span class="station-km">Rømø · DK</span>
+    </div>
+    <div class="water-name">Nordsee / Wattenmeer · DMI-Gezeitenpegel 26136</div>
+    <div class="value-row">
+      <div class="value skeleton" id="value-HAVNEBY">— <span class="unit">cm</span></div>
+      <div class="trend flat" id="trend-HAVNEBY">wird geladen…</div>
+    </div>
+    <div class="chart-wrap" id="chartwrap-HAVNEBY">
+      <div class="chart-label-row">
+        <span>GEZEITEN 48H · SKALA IN CM</span>
+        <span><span class="legend-dot"></span>gemessen&nbsp;&nbsp;<span class="legend-dot fc"></span>vorhersage&nbsp;&nbsp;<span class="legend-dot thresh"></span>SyltExpress&nbsp;&nbsp;<span class="legend-dot thresh2"></span>RømøExpress</span>
+      </div>
+      <svg class="chart-svg" id="chart-HAVNEBY" viewBox="0 0 640 200" preserveAspectRatio="none"></svg>
+      <div class="chart-tooltip" id="tooltip-HAVNEBY"></div>
+    </div>
+    <div class="foot-row">
+      <div class="meta-col">
+        <div id="meta-HAVNEBY">Letzte Messung: —</div>
+        <div id="forecast-meta-HAVNEBY">Vorhersage: astronomische Gezeitenkurve (DMI)</div>
+      </div>
+    </div>
+    <div class="err-msg" id="err-HAVNEBY" style="display:none;"></div>
+    <div class="tide-events">
+      <div class="tide-events-label">Hoch-/Niedrigwasser · Gezeitenvorhersage DMI</div>
+      <div class="tide-events-list" id="tide-list-havneby">lädt…</div>
+    </div>
+  `;
+  grid.appendChild(card);
+}
+
+function fmtTime(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString("de-DE", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" });
+  }catch(e){ return iso; }
+}
+function fmtDate(ms){
+  return new Date(ms).toLocaleDateString("de-DE", { day:"2-digit", month:"2-digit" });
+}
+function fmtClock(ms){
+  return new Date(ms).toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
+}
+
+// --- big centered chart: 20cm background grid + vertical date/time gridlines + forecast tail + threshold line ---
+function buildChart(measured, forecast, unit, threshold, thresholdLabel, threshold2, threshold2Label){
+  const w = 640, h = 200;
+  const padL = 34, padR = 10, padT = 10, padB = 28;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+
+  const gridColor = cssVar('--chart-grid');
+  const textColor = cssVar('--chart-text');
+  const measuredColor = cssVar('--chart-measured');
+  const areaColor = cssVar('--chart-area');
+  const forecastColor = cssVar('--chart-forecast');
+  const threshColor = cssVar('--chart-threshold');
+  const thresh2Color = cssVar('--chart-threshold2');
+  const nowLineColor = cssVar('--chart-now-line');
+  const nowDotColor = cssVar('--chart-now-dot');
+
+  const measPts = measured.map(p => ({ t: new Date(p.timestamp).getTime(), value: p.value, type: "measured" }));
+  const fcPts = (forecast || []).map(p => ({ t: new Date(p.timestamp).getTime(), value: p.value, type: "forecast" }));
+  const allPts = measPts.concat(fcPts).sort((a,b) => a.t - b.t);
+
+  if(allPts.length < 2){
+    return { svg: `<text x="${w/2}" y="${h/2}" fill="${textColor}" font-size="11" text-anchor="middle">nicht genug Daten</text>`, state: null };
+  }
+
+  const vals = allPts.map(p => p.value);
+  if(typeof threshold === "number") vals.push(threshold);
+  if(typeof threshold2 === "number") vals.push(threshold2);
+  let min = Math.min(...vals), max = Math.max(...vals);
+  if(max - min < GRID_STEP) { const mid = (max+min)/2; min = mid - GRID_STEP; max = mid + GRID_STEP; }
+  const vpad = (max - min) * 0.12;
+  min -= vpad; max += vpad;
+
+  const t0 = allPts[0].t, t1 = allPts[allPts.length-1].t;
+  const tRange = (t1 - t0) || 1;
+
+  const xFor = t => padL + ((t - t0) / tRange) * plotW;
+  const yFor = v => padT + plotH - ((v - min) / (max - min)) * plotH;
+
+  // horizontal cm grid
+  let hGrid = "";
+  const gridStart = Math.ceil(min / GRID_STEP) * GRID_STEP;
+  for(let v = gridStart; v <= max; v += GRID_STEP){
+    const y = yFor(v);
+    hGrid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w-padR}" y2="${y.toFixed(1)}" stroke="${gridColor}" stroke-width="1"></line>`;
+    hGrid += `<text x="${padL-6}" y="${(y+3).toFixed(1)}" fill="${textColor}" font-size="9" text-anchor="end" font-family="Roboto, sans-serif">${v}</text>`;
+  }
+
+  // vertical date/time grid — 5 evenly spaced ticks across the full range
+  let vGrid = "";
+  const TICKS = 5;
+  for(let i=0;i<TICKS;i++){
+    const t = t0 + (tRange * i)/(TICKS-1);
+    const x = xFor(t);
+    vGrid += `<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" y2="${padT+plotH}" stroke="${gridColor}" stroke-width="1"></line>`;
+    vGrid += `<text x="${x.toFixed(1)}" y="${(padT+plotH+11).toFixed(1)}" fill="${textColor}" font-size="8.5" text-anchor="middle" font-family="Roboto, sans-serif">${fmtDate(t)}</text>`;
+    vGrid += `<text x="${x.toFixed(1)}" y="${(padT+plotH+21).toFixed(1)}" fill="${textColor}" font-size="8.5" text-anchor="middle" font-family="Roboto, sans-serif">${fmtClock(t)}</text>`;
+  }
+
+  // measured line + area
+  const measPath = measPts.map((p,i) => (i===0?"M":"L") + xFor(p.t).toFixed(1) + "," + yFor(p.value).toFixed(1)).join(" ");
+  const lastM = measPts[measPts.length-1];
+  const areaPath = measPath + ` L${xFor(lastM.t).toFixed(1)},${padT+plotH} L${padL},${padT+plotH} Z`;
+
+  // forecast line (dashed, continues from last measured point) — only future points are ever passed in
+  let fcPath = "";
+  if(fcPts.length){
+    const fcLine = [lastM, ...fcPts];
+    fcPath = fcLine.map((p,i) => (i===0?"M":"L") + xFor(p.t).toFixed(1) + "," + yFor(p.value).toFixed(1)).join(" ");
+  }
+
+  const nowX = xFor(lastM.t).toFixed(1);
+
+  // threshold line(s) (Fährgrenze) — drawn on top so they're always visible
+  let threshLine = "";
+  if(typeof threshold === "number"){
+    const ty = yFor(threshold);
+    const labelText = thresholdLabel || `${threshold} ${unit}`;
+    threshLine += `
+      <line x1="${padL}" y1="${ty.toFixed(1)}" x2="${w-padR}" y2="${ty.toFixed(1)}" stroke="${threshColor}" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.9"></line>
+      <text x="${w-padR}" y="${(ty-4).toFixed(1)}" fill="${threshColor}" font-size="9" font-weight="700" text-anchor="end" font-family="Roboto, sans-serif">${labelText}</text>
+    `;
+  }
+  if(typeof threshold2 === "number"){
+    const ty2 = yFor(threshold2);
+    const labelText2 = threshold2Label || `${threshold2} ${unit}`;
+    threshLine += `
+      <line x1="${padL}" y1="${ty2.toFixed(1)}" x2="${w-padR}" y2="${ty2.toFixed(1)}" stroke="${thresh2Color}" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.9"></line>
+      <text x="${w-padR}" y="${(ty2-4).toFixed(1)}" fill="${thresh2Color}" font-size="9" font-weight="700" text-anchor="end" font-family="Roboto, sans-serif">${labelText2}</text>
+    `;
+  }
+
+  const svg = `
+    ${hGrid}
+    ${vGrid}
+    <path d="${areaPath}" fill="${areaColor}" stroke="none"></path>
+    <path d="${measPath}" fill="none" stroke="${measuredColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+    ${fcPath ? `<path d="${fcPath}" fill="none" stroke="${forecastColor}" stroke-width="2" stroke-dasharray="5,4" stroke-linejoin="round" stroke-linecap="round"></path>` : ""}
+    <line x1="${nowX}" y1="${padT}" x2="${nowX}" y2="${padT+plotH}" stroke="${nowLineColor}" stroke-width="1" stroke-dasharray="2,3" opacity="0.4"></line>
+    <circle cx="${nowX}" cy="${yFor(lastM.value).toFixed(1)}" r="3" fill="${nowDotColor}"></circle>
+    ${threshLine}
+  `;
+
+  return {
+    svg,
+    state: { points: allPts, t0, tRange, min, max, padL, padR, padT, padB, plotW, plotH, w, h }
+  };
+}
+
+function attachHover(id, state, unit){
+  const svg = document.getElementById("chart-" + id);
+  const wrap = document.getElementById("chartwrap-" + id);
+  const tooltip = document.getElementById("tooltip-" + id);
+  if(!state){ svg.onmousemove = null; svg.onmouseleave = null; return; }
+
+  const ns = "http://www.w3.org/2000/svg";
+  let hoverLine = svg.querySelector(".hover-line");
+  let hoverDot = svg.querySelector(".hover-dot");
+  if(!hoverLine){
+    hoverLine = document.createElementNS(ns, "line");
+    hoverLine.setAttribute("class", "hover-line");
+    hoverLine.setAttribute("stroke-width", "1");
+    hoverLine.setAttribute("stroke-dasharray", "3,3");
+    hoverLine.setAttribute("opacity", "0");
+    svg.appendChild(hoverLine);
+  }
+  if(!hoverDot){
+    hoverDot = document.createElementNS(ns, "circle");
+    hoverDot.setAttribute("class", "hover-dot");
+    hoverDot.setAttribute("r", "3.5");
+    hoverDot.setAttribute("opacity", "0");
+    svg.appendChild(hoverDot);
+  }
+  hoverLine.setAttribute("stroke", cssVar('--chart-hover-line'));
+
+  function nearestPoint(viewX){
+    const t = state.t0 + ((viewX - state.padL) / state.plotW) * state.tRange;
+    let nearest = state.points[0], best = Infinity;
+    for(const p of state.points){
+      const d = Math.abs(p.t - t);
+      if(d < best){ best = d; nearest = p; }
+    }
+    return nearest;
+  }
+
+  function show(clientX, clientY){
+    const rect = svg.getBoundingClientRect();
+    const viewX = ((clientX - rect.left) / rect.width) * state.w;
+    if(viewX < state.padL - 5 || viewX > state.w - state.padR + 5){ hide(); return; }
+    const p = nearestPoint(viewX);
+    const x = state.padL + ((p.t - state.t0) / state.tRange) * state.plotW;
+    const y = state.padT + state.plotH - ((p.value - state.min) / (state.max - state.min)) * state.plotH;
+
+    hoverLine.setAttribute("x1", x); hoverLine.setAttribute("x2", x);
+    hoverLine.setAttribute("y1", state.padT); hoverLine.setAttribute("y2", state.padT + state.plotH);
+    hoverLine.setAttribute("opacity", "0.8");
+    hoverDot.setAttribute("cx", x); hoverDot.setAttribute("cy", y);
+    hoverDot.setAttribute("fill", p.type === "forecast" ? cssVar('--chart-forecast') : cssVar('--chart-measured'));
+    hoverDot.setAttribute("opacity", "1");
+
+    tooltip.innerHTML = `<b>${p.value.toLocaleString("de-DE")} ${unit}</b><br>${p.type === "forecast" ? "Prognose · " : ""}${fmtDate(p.t)} · ${fmtClock(p.t)} Uhr`;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    let left = clientX - wrapRect.left + 14;
+    let top = clientY - wrapRect.top - 12;
+    const tw = tooltip.offsetWidth || 120;
+    if(left > wrapRect.width - tw - 4) left = clientX - wrapRect.left - tw - 14;
+    top = Math.max(0, Math.min(top, wrapRect.height - 40));
+    tooltip.style.left = left + "px";
+    tooltip.style.top = top + "px";
+    tooltip.style.opacity = "1";
+  }
+
+  function hide(){
+    hoverLine.setAttribute("opacity", "0");
+    hoverDot.setAttribute("opacity", "0");
+    tooltip.style.opacity = "0";
+  }
+
+  svg.onmousemove = e => show(e.clientX, e.clientY);
+  svg.onmouseleave = hide;
+  svg.ontouchmove = e => { if(e.touches[0]) show(e.touches[0].clientX, e.touches[0].clientY); };
+  svg.ontouchend = hide;
+}
+
+function buildGauge(current, min, max, mw){
+  const w = 52, h = 220, padTop = 8, padBot = 8;
+  const usableH = h - padTop - padBot;
+  const lo = Math.min(min, current) - (max-min)*0.15 - 1;
+  const hi = Math.max(max, current) + (max-min)*0.15 + 1;
+  const range = (hi - lo) || 1;
+  const yFor = v => padTop + usableH - ((v - lo) / range) * usableH;
+
+  const bandA = cssVar('--gauge-band-a');
+  const bandB = cssVar('--gauge-band-b');
+  const frame = cssVar('--gauge-frame');
+  const mwColor = cssVar('--gauge-mw');
+  const curColor = cssVar('--gauge-current');
+
+  let bands = "";
+  const bandH = usableH / 11;
+  for(let i=0;i<11;i++){
+    const y = padTop + i*bandH;
+    const col = i % 2 === 0 ? bandA : bandB;
+    bands += `<rect x="14" y="${y.toFixed(1)}" width="16" height="${bandH.toFixed(1)}" fill="${col}" opacity="0.9"></rect>`;
+  }
+
+  let mwLine = "";
+  if(mw !== null && mw !== undefined && mw > lo && mw < hi){
+    const y = yFor(mw);
+    mwLine = `<line x1="6" y1="${y.toFixed(1)}" x2="46" y2="${y.toFixed(1)}" stroke="${mwColor}" stroke-width="1" stroke-dasharray="2,2"></line>`;
+  }
+
+  const curY = yFor(current);
+  const marker = `
+    <polygon points="${(30).toFixed(1)},${curY.toFixed(1)} ${44},${(curY-5).toFixed(1)} ${44},${(curY+5).toFixed(1)}" fill="${curColor}"></polygon>
+    <line x1="6" y1="${curY.toFixed(1)}" x2="30" y2="${curY.toFixed(1)}" stroke="${curColor}" stroke-width="2"></line>
+  `;
+
+  return `
+    <rect x="14" y="${padTop}" width="16" height="${usableH.toFixed(1)}" fill="${bandA}" rx="2"></rect>
+    ${bands}
+    <rect x="14" y="${padTop}" width="16" height="${usableH.toFixed(1)}" fill="none" stroke="${frame}" stroke-width="1"></rect>
+    ${mwLine}
+    ${marker}
+  `;
+}
+
+// re-render chart + gauge for one station from cached data (used after theme switch)
+function renderStationVisuals(id){
+  const cache = stationCache[id];
+  if(!cache) return;
+  const s = STATIONS.find(x => x.id === id);
+
+  const chartSvg = document.getElementById("chart-" + id);
+  const built = buildChart(cache.points, cache.forecast, cache.unit, s.threshold, s.thresholdLabel);
+  chartSvg.innerHTML = built.svg;
+  chartStates[id] = built.state;
+  attachHover(id, built.state, cache.unit);
+
+  const gaugeSvg = document.getElementById("gauge-" + id);
+  gaugeSvg.innerHTML = buildGauge(cache.cur, cache.gMin, cache.gMax, cache.mw);
+}
+
+async function fetchStation(id){
+  const url = `${API}/stations/${encodeURIComponent(id)}.json?includeTimeseries=true&includeCurrentMeasurement=true&includeCharacteristicValues=true&includeForecastTimeseries=true`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("Station " + id + ": HTTP " + res.status);
+  return res.json();
+}
+
+async function fetchMeasurements(id){
+  const url = `${API}/stations/${encodeURIComponent(id)}/W/measurements.json?start=P2D`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("Messreihe " + id + ": HTTP " + res.status);
+  return res.json();
+}
+
+async function fetchForecast(id, hasWV){
+  if(!hasWV) return [];
+  try{
+    const url = `${API}/stations/${encodeURIComponent(id)}/WV/measurements.json`;
+    const res = await fetch(url);
+    if(!res.ok) return [];
+    const data = await res.json();
+    const now = Date.now();
+    // drop forecast entries that already lie in the past — only the road ahead is shown
+    return (data || [])
+      .map(p => ({ timestamp: p.timestamp, value: p.value }))
+      .filter(p => typeof p.value === "number" && new Date(p.timestamp).getTime() >= now);
+  }catch(e){
+    return [];
+  }
+}
+
+// --- BSH Wasserstandsvorhersage (Gezeiten Hoch-/Niedrigwasser + Kurvenvorhersage) für Glückstadt ---
+const BSH_API = "https://gdi.bsh.de/ldproxy/rest/services/WaterLevelForecast/collections/waterlevelforecastdata/items";
+const BSH_STATIONS = { "GLÜCKSTADT": "glueckstadt" };
+
+async function fetchBshWaterLevel(bshId){
+  const res = await fetch(`${BSH_API}/${encodeURIComponent(bshId)}?f=json`);
+  if(!res.ok) throw new Error("BSH-Vorhersage " + bshId + ": HTTP " + res.status);
+  const data = await res.json();
+  const props = data.properties || {};
+  const now = Date.now();
+
+  // Kurvenvorhersage: bevorzugt automated_curve_forecast, sonst tidal_prediction — nur zukünftige Punkte
+  const curve = (props.curve || [])
+    .map(p => ({
+      timestamp: p.timestamp,
+      value: (typeof p.automated_curve_forecast === "number") ? p.automated_curve_forecast : p.tidal_prediction
+    }))
+    .filter(p => typeof p.value === "number" && new Date(p.timestamp).getTime() >= now);
+
+  // Hoch-/Niedrigwasser-Ereignisse: bevorzugt offizieller forecast_value, sonst tidal_prediction_value
+  const events = (props.high_water_low_water || [])
+    .map(e => ({
+      timestamp: e.event_timestamp,
+      event: e.event,
+      value: (typeof e.forecast_value === "number") ? e.forecast_value : e.tidal_prediction_value
+    }))
+    .filter(e => typeof e.value === "number" && e.timestamp)
+    .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+  return { curve, events };
+}
+
+function renderTideEvents(listId, events){
+  const el = document.getElementById(listId);
+  if(!el) return;
+  if(!events.length){
+    el.innerHTML = `<span class="tide-empty">keine Scheitelwertvorhersage verfügbar</span>`;
+    return;
+  }
+  el.innerHTML = events.slice(0, 6).map(e => {
+    const isHW = e.event === "HW";
+    const t = new Date(e.timestamp).getTime();
+    return `
+      <div class="tide-row">
+        <span class="tide-badge ${isHW ? "hw" : "nw"}">${isHW ? "HW" : "NW"}</span>
+        <span class="tide-time">${fmtDate(t)} · ${fmtClock(t)} Uhr</span>
+        <span class="tide-value">${Math.round(e.value)} cm</span>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadGlueckstadtTide(){
+  const bshId = BSH_STATIONS["GLÜCKSTADT"];
+  const listId = "tide-list-glueckstadt";
+  try{
+    const { curve, events } = await fetchBshWaterLevel(bshId);
+    renderTideEvents(listId, events);
+
+    // Kurvenvorhersage als Prognoselinie im Glückstadt-Chart verwenden (PEGELONLINE liefert
+    // für diesen tidebeeinflussten Elbe-Pegel keine eigene WV-Prognosezeitreihe)
+    const cache = stationCache["GLÜCKSTADT"];
+    if(cache && curve.length){
+      cache.forecast = curve;
+      renderStationVisuals("GLÜCKSTADT");
+      const fcMetaEl = document.getElementById("forecast-meta-GLÜCKSTADT");
+      if(fcMetaEl){
+        const last = curve[curve.length-1];
+        fcMetaEl.innerHTML = `<span class="fc-line">BSH-Kurvenvorhersage bis ${fmtTime(last.timestamp)} Uhr: ${Math.round(last.value)} cm</span>` +
+          `<br><span class="thresh-line">334 cm — NW -0,4m Elbfähre kritisch</span>`;
+      }
+    }
+  }catch(err){
+    console.error(err);
+    const el = document.getElementById(listId);
+    if(el) el.innerHTML = `<span class="tide-empty">BSH-Wasserstandsvorhersage konnte nicht geladen werden.</span>`;
+  }
+}
+
+// --- Havneby (DK) — DMI Oceanographic Observation & Tidewater API ---
+const DMI_API = "https://opendataapi.dmi.dk/v2/oceanObs";
+const HAVNEBY_STATION_ID = "26136";
+const HAVNEBY_SYLTEXPRESS_LIMIT = 250; // cm — SyltExpress stellt bei HW ein
+const HAVNEBY_ROMOEXPRESS_LIMIT = 170; // cm — RømøExpress stellt bei HW ein
+
+async function fetchDmiObservations(stationId){
+  const from = new Date(Date.now() - 48*3600*1000).toISOString();
+  for(const parameterId of ["sealev_dvr", "sealev_ln"]){
+    try{
+      const url = `${DMI_API}/collections/observation/items?stationId=${stationId}&parameterId=${parameterId}&datetime=${from}/..&limit=500&sortorder=observed,ASC`;
+      const res = await fetch(url);
+      if(!res.ok) continue;
+      const data = await res.json();
+      const pts = (data.features || [])
+        .map(f => ({ timestamp: f.properties.observed, value: f.properties.value }))
+        .filter(p => typeof p.value === "number");
+      if(pts.length) return pts;
+    }catch(e){ /* try next parameterId */ }
+  }
+  return [];
+}
+
+async function fetchDmiTidewaterCurve(stationId){
+  const now = new Date().toISOString();
+  const to = new Date(Date.now() + 48*3600*1000).toISOString();
+  const url = `${DMI_API}/collections/tidewater/items?stationId=${stationId}&predictionType=10minutes&datetime=${now}/${to}&limit=500`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("DMI Gezeitenkurve: HTTP " + res.status);
+  const data = await res.json();
+  return (data.features || [])
+    .map(f => ({ timestamp: f.properties.predictionTime, value: f.properties.value }))
+    .filter(p => typeof p.value === "number")
+    .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+}
+
+async function fetchDmiTideEvents(stationId){
+  const from = new Date(Date.now() - 6*3600*1000).toISOString();
+  const to = new Date(Date.now() + 4*24*3600*1000).toISOString();
+  const url = `${DMI_API}/collections/tidewater/items?stationId=${stationId}&predictionType=minimum_maximum&datetime=${from}/${to}&limit=200`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("DMI Scheitelwerte: HTTP " + res.status);
+  const data = await res.json();
+  const now = Date.now();
+  return (data.features || [])
+    .map(f => ({
+      timestamp: f.properties.predictionTime,
+      event: f.properties.predictionType === "maximum" ? "HW" : "NW",
+      value: f.properties.value
+    }))
+    .filter(e => typeof e.value === "number" && new Date(e.timestamp).getTime() >= now)
+    .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+}
+
+function renderHavnebyTideEvents(events){
+  const el = document.getElementById("tide-list-havneby");
+  if(!el) return;
+  if(!events.length){
+    el.innerHTML = `<span class="tide-empty">keine Scheitelwertvorhersage verfügbar</span>`;
+    return;
+  }
+  el.innerHTML = events.slice(0, 6).map(e => {
+    const isHW = e.event === "HW";
+    const t = new Date(e.timestamp).getTime();
+    let warn = "";
+    if(isHW && e.value >= HAVNEBY_SYLTEXPRESS_LIMIT) warn = ` <span style="color:var(--chart-threshold); font-weight:700;">· SyltExpress betroffen</span>`;
+    else if(isHW && e.value >= HAVNEBY_ROMOEXPRESS_LIMIT) warn = ` <span style="color:var(--chart-threshold2); font-weight:700;">· RømøExpress betroffen</span>`;
+    return `
+      <div class="tide-row">
+        <span class="tide-badge ${isHW ? "hw" : "nw"}">${isHW ? "HW" : "NW"}</span>
+        <span class="tide-time">${fmtDate(t)} · ${fmtClock(t)} Uhr</span>
+        <span class="tide-value">${Math.round(e.value)} cm${warn}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderHavnebyVisuals(){
+  if(!havnebyCache) return;
+  const built = buildChart(
+    havnebyCache.measured, havnebyCache.forecast, "cm",
+    HAVNEBY_SYLTEXPRESS_LIMIT, "250 cm · SyltExpress stellt bei HW ein",
+    HAVNEBY_ROMOEXPRESS_LIMIT, "170 cm · RømøExpress stellt bei HW ein"
+  );
+  document.getElementById("chart-HAVNEBY").innerHTML = built.svg;
+  chartStates["HAVNEBY"] = built.state;
+  attachHover("HAVNEBY", built.state, "cm");
+}
+
+async function loadHavneby(){
+  const errBox = document.getElementById("err-HAVNEBY");
+  errBox.style.display = "none";
+  try{
+    const [measured, forecast, events] = await Promise.all([
+      fetchDmiObservations(HAVNEBY_STATION_ID),
+      fetchDmiTidewaterCurve(HAVNEBY_STATION_ID),
+      fetchDmiTideEvents(HAVNEBY_STATION_ID)
+    ]);
+
+    if(!measured.length && !forecast.length) throw new Error("Havneby: keine Daten verfügbar");
+
+    const lastM = measured.length ? measured[measured.length-1] : forecast[0];
+    document.getElementById("value-HAVNEBY").classList.remove("skeleton");
+    document.getElementById("value-HAVNEBY").innerHTML = `${Math.round(lastM.value)} <span class="unit">cm</span>`;
+
+    const trendEl = document.getElementById("trend-HAVNEBY");
+    if(measured.length >= 2){
+      const diff = measured[measured.length-1].value - measured[measured.length-2].value;
+      trendEl.className = "trend " + (diff > 0.5 ? "up" : diff < -0.5 ? "down" : "flat");
+      trendEl.textContent = (diff > 0.5 ? "▲ steigend" : diff < -0.5 ? "▼ fallend" : "● stabil");
+    }else{
+      trendEl.className = "trend flat";
+      trendEl.textContent = "Gezeiten";
+    }
+
+    document.getElementById("meta-HAVNEBY").innerHTML = `Letzte Messung: <b>${fmtTime(lastM.timestamp)}</b> Uhr`;
+
+    havnebyCache = { measured: measured.length ? measured : [lastM], forecast };
+    renderHavnebyVisuals();
+    renderHavnebyTideEvents(events);
+  }catch(err){
+    console.error(err);
+    errBox.style.display = "block";
+    errBox.innerHTML = `Daten für Havneby konnten nicht geladen werden (DMI Open Data, Station ${HAVNEBY_STATION_ID}).`;
+    renderHavnebyTideEvents([]);
+  }
+}
+
+async function loadStation(s){
+  const errBox = document.getElementById("err-" + s.id);
+  errBox.style.display = "none";
+  try{
+    const station = await fetchStation(s.id);
+    const ts = (station.timeseries || []).find(t => t.shortname === "W") || (station.timeseries || [])[0];
+    if(!ts || !ts.currentMeasurement) throw new Error("Keine Wasserstandsdaten verfügbar");
+
+    const hasWV = (station.timeseries || []).some(t => t.shortname === "WV");
+    const [series, forecast] = await Promise.all([
+      fetchMeasurements(s.id),
+      fetchForecast(s.id, hasWV)
+    ]);
+
+    const unit = ts.unit || "cm";
+    const cur = ts.currentMeasurement.value;
+    const curTime = ts.currentMeasurement.timestamp;
+
+    document.getElementById("km-" + s.id).textContent = "km " + (station.km !== undefined ? station.km.toFixed(2).replace(".", ",") : "—");
+    document.getElementById("water-" + s.id).textContent = (station.water && station.water.longname) || "Rhein";
+
+    const valueEl = document.getElementById("value-" + s.id);
+    valueEl.classList.remove("skeleton");
+    valueEl.innerHTML = `${cur.toLocaleString("de-DE")} <span class="unit">${unit}</span>`;
+
+    const points = (series || []).map(p => ({ timestamp: p.timestamp, value: p.value })).filter(p => typeof p.value === "number");
+
+    let trendEl = document.getElementById("trend-" + s.id);
+    if(points.length >= 2){
+      const lastVal = points[points.length-1].value;
+      const refIdx = Math.max(0, points.length - 1 - 24);
+      const refVal = points[refIdx].value;
+      const diff = +(lastVal - refVal).toFixed(1);
+      if(Math.abs(diff) < 0.5){
+        trendEl.className = "trend flat";
+        trendEl.textContent = "→ stabil";
+      } else if(diff > 0){
+        trendEl.className = "trend up";
+        trendEl.textContent = `↗ steigend, +${diff} ${unit} / 6h`;
+      } else {
+        trendEl.className = "trend down";
+        trendEl.textContent = `↘ fallend, ${diff} ${unit} / 6h`;
+      }
+    } else {
+      trendEl.className = "trend flat";
+      trendEl.textContent = "Trend unbekannt";
+    }
+
+    document.getElementById("meta-" + s.id).innerHTML =
+      `Letzte Messung: <b>${fmtTime(curTime)}</b> Uhr`;
+
+    const fcMetaEl = document.getElementById("forecast-meta-" + s.id);
+    if(forecast.length){
+      const last = forecast[forecast.length-1];
+      fcMetaEl.innerHTML = `<span class="fc-line">Prognose bis ${fmtTime(last.timestamp)} Uhr: ${last.value.toLocaleString("de-DE")} ${unit}</span>`;
+    } else {
+      fcMetaEl.textContent = "Prognose: für diesen Pegel nicht verfügbar";
+    }
+    if(s.threshold !== undefined){
+      fcMetaEl.innerHTML += `<br><span class="thresh-line">Fährgrenze: ${s.threshold} ${unit} — ${s.thresholdLabel.split('·')[1] || 'Fähre stellt ein'}</span>`;
+    }
+
+    let mw = null;
+    if(ts.characteristicValues){
+      const mwEntry = ts.characteristicValues.find(c => c.shortname === "MW");
+      if(mwEntry) mw = mwEntry.value;
+    }
+    const gaugeVals = points.map(p => p.value).concat([cur]);
+    const gMin = Math.min(...gaugeVals), gMax = Math.max(...gaugeVals);
+
+    // cache raw data so we can redraw charts/gauges on theme toggle without refetching
+    stationCache[s.id] = { points, forecast, unit, cur, mw, gMin, gMax };
+    renderStationVisuals(s.id);
+
+  }catch(err){
+    console.error(err);
+    errBox.style.display = "block";
+    errBox.innerHTML = `Daten für ${s.label} konnten nicht geladen werden. ` +
+      `Direkt prüfen: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/${encodeURIComponent(s.id)}.json?includeTimeseries=true&includeCurrentMeasurement=true" target="_blank" rel="noopener">PEGELONLINE API</a>`;
+  }
+}
+
+// --- Helgoland/Brunsbüttel: Wind (Open-Meteo Forecast API) & Wellenhöhe (Open-Meteo Marine API) ---
+function buildMiniChart(points, color, unit, threshold, thresholdLabel){
+  const w = 320, h = 130, padL = 28, padR = 8, padT = 8, padB = 30;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+  const gridColor = cssVar('--chart-grid');
+  const textColor = cssVar('--chart-text');
+  const threshColor = cssVar('--chart-threshold');
+
+  const pts = (points || []).filter(p => typeof p.value === "number").map(p => ({ t: new Date(p.timestamp).getTime(), value: p.value }));
+  if(pts.length < 2){
+    return { svg: `<text x="${w/2}" y="${h/2}" fill="${textColor}" font-size="10" text-anchor="middle">keine Daten</text>`, state: null };
+  }
+  const vals = pts.map(p => p.value);
+  if(typeof threshold === "number") vals.push(threshold);
+  let min = Math.min(0, ...vals), max = Math.max(...vals);
+  if(max - min < 1) max = min + 1;
+  const vpad = (max - min) * 0.14;
+  max += vpad;
+  const t0 = pts[0].t, t1 = pts[pts.length-1].t, tRange = (t1 - t0) || 1;
+  const xFor = t => padL + ((t - t0) / tRange) * plotW;
+  const yFor = v => padT + plotH - ((v - min) / (max - min)) * plotH;
+
+  let hGrid = "";
+  const steps = 3;
+  for(let i=0;i<=steps;i++){
+    const v = min + ((max-min)/steps)*i;
+    const y = yFor(v);
+    hGrid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${w-padR}" y2="${y.toFixed(1)}" stroke="${gridColor}" stroke-width="1"></line>`;
+    hGrid += `<text x="${padL-4}" y="${(y+3).toFixed(1)}" fill="${textColor}" font-size="8" text-anchor="end" font-family="Roboto, sans-serif">${v.toFixed(1)}</text>`;
+  }
+  const TICKS = 3;
+  let vGrid = "";
+  for(let i=0;i<TICKS;i++){
+    const t = t0 + (tRange*i)/(TICKS-1);
+    const x = xFor(t);
+    vGrid += `<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" y2="${padT+plotH}" stroke="${gridColor}" stroke-width="1"></line>`;
+    vGrid += `<text x="${x.toFixed(1)}" y="${(padT+plotH+11).toFixed(1)}" fill="${textColor}" font-size="8" text-anchor="middle" font-family="Roboto, sans-serif">${fmtDate(t)}</text>`;
+    vGrid += `<text x="${x.toFixed(1)}" y="${(padT+plotH+21).toFixed(1)}" fill="${textColor}" font-size="8" text-anchor="middle" font-family="Roboto, sans-serif">${fmtClock(t)}</text>`;
+  }
+  const linePath = pts.map((p,i) => (i===0?"M":"L") + xFor(p.t).toFixed(1) + "," + yFor(p.value).toFixed(1)).join(" ");
+  const areaPath = linePath + ` L${xFor(pts[pts.length-1].t).toFixed(1)},${padT+plotH} L${padL},${padT+plotH} Z`;
+
+  let threshLine = "";
+  if(typeof threshold === "number"){
+    const ty = yFor(threshold);
+    threshLine = `
+      <line x1="${padL}" y1="${ty.toFixed(1)}" x2="${w-padR}" y2="${ty.toFixed(1)}" stroke="${threshColor}" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.9"></line>
+      <text x="${w-padR}" y="${(ty-4).toFixed(1)}" fill="${threshColor}" font-size="8" font-weight="700" text-anchor="end" font-family="Roboto, sans-serif">${thresholdLabel || (threshold + ' ' + unit)}</text>
+    `;
+  }
+
+  const svg = `
+    ${hGrid}
+    ${vGrid}
+    <path d="${areaPath}" fill="${color}" fill-opacity="0.14" stroke="none"></path>
+    <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path>
+    ${threshLine}
+  `;
+  return {
+    svg,
+    state: { points: pts, t0, tRange, min, max, padL, padR, padT, padB, plotW, plotH, w, h, color }
+  };
+}
+
+function attachMiniHover(chartId, tooltipId, state, unit, decimals){
+  const svg = document.getElementById(chartId);
+  const wrap = svg.closest(".hg-chart-wrap");
+  const tooltip = document.getElementById(tooltipId);
+  if(!state){ svg.onmousemove = null; svg.onmouseleave = null; return; }
+
+  const ns = "http://www.w3.org/2000/svg";
+  let hoverLine = svg.querySelector(".hover-line");
+  let hoverDot = svg.querySelector(".hover-dot");
+  if(!hoverLine){
+    hoverLine = document.createElementNS(ns, "line");
+    hoverLine.setAttribute("class", "hover-line");
+    hoverLine.setAttribute("stroke-width", "1");
+    hoverLine.setAttribute("stroke-dasharray", "3,3");
+    hoverLine.setAttribute("opacity", "0");
+    svg.appendChild(hoverLine);
+  }
+  if(!hoverDot){
+    hoverDot = document.createElementNS(ns, "circle");
+    hoverDot.setAttribute("class", "hover-dot");
+    hoverDot.setAttribute("r", "3.5");
+    hoverDot.setAttribute("opacity", "0");
+    svg.appendChild(hoverDot);
+  }
+  hoverLine.setAttribute("stroke", cssVar('--chart-hover-line'));
+  hoverDot.setAttribute("fill", state.color);
+
+  function nearestPoint(viewX){
+    const t = state.t0 + ((viewX - state.padL) / state.plotW) * state.tRange;
+    let nearest = state.points[0], best = Infinity;
+    for(const p of state.points){
+      const d = Math.abs(p.t - t);
+      if(d < best){ best = d; nearest = p; }
+    }
+    return nearest;
+  }
+
+  function show(clientX, clientY){
+    const rect = svg.getBoundingClientRect();
+    const viewX = ((clientX - rect.left) / rect.width) * state.w;
+    if(viewX < state.padL - 5 || viewX > state.w - state.padR + 5){ hide(); return; }
+    const p = nearestPoint(viewX);
+    const x = state.padL + ((p.t - state.t0) / state.tRange) * state.plotW;
+    const y = state.padT + state.plotH - ((p.value - state.min) / (state.max - state.min)) * state.plotH;
+
+    hoverLine.setAttribute("x1", x); hoverLine.setAttribute("x2", x);
+    hoverLine.setAttribute("y1", state.padT); hoverLine.setAttribute("y2", state.padT + state.plotH);
+    hoverLine.setAttribute("opacity", "0.8");
+    hoverDot.setAttribute("cx", x); hoverDot.setAttribute("cy", y);
+    hoverDot.setAttribute("opacity", "1");
+
+    const valueText = p.value.toLocaleString("de-DE", { maximumFractionDigits: decimals ?? 0 });
+    tooltip.innerHTML = `<b>${valueText} ${unit}</b><br>${fmtDate(p.t)} · ${fmtClock(p.t)} Uhr`;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    let left = clientX - wrapRect.left + 14;
+    let top = clientY - wrapRect.top - 12;
+    const tw = tooltip.offsetWidth || 120;
+    if(left > wrapRect.width - tw - 4) left = clientX - wrapRect.left - tw - 14;
+    top = Math.max(0, Math.min(top, wrapRect.height - 40));
+    tooltip.style.left = left + "px";
+    tooltip.style.top = top + "px";
+    tooltip.style.opacity = "1";
+  }
+
+  function hide(){
+    hoverLine.setAttribute("opacity", "0");
+    hoverDot.setAttribute("opacity", "0");
+    tooltip.style.opacity = "0";
+  }
+
+  svg.onmousemove = e => show(e.clientX, e.clientY);
+  svg.onmouseleave = hide;
+  svg.ontouchmove = e => { if(e.touches[0]) show(e.touches[0].clientX, e.touches[0].clientY); };
+  svg.ontouchend = hide;
+}
+
+const HALUNDER_WAVE_LIMIT = 2.3;              // m — Helgoland-Ablegen stellt oberhalb ein
+const HALUNDER_WIND_LIMIT_KN = 20; // kn — oberhalb dessen wird Brunsbüttel nicht angefahren
+
+function renderHelgolandVisuals(){
+  if(!helgolandCache) return;
+
+  const wind = buildMiniChart(helgolandCache.windSeries, cssVar('--chart-measured'), "kn");
+  document.getElementById("hg-wind-chart").innerHTML = wind.svg;
+  attachMiniHover("hg-wind-chart", "hg-tooltip-wind", wind.state, "kn", 0);
+
+  const wave = buildMiniChart(helgolandCache.waveSeries, cssVar('--mid-green'), "m", HALUNDER_WAVE_LIMIT, "2,3 m · Halunder Jet stellt ein");
+  document.getElementById("hg-wave-chart").innerHTML = wave.svg;
+  attachMiniHover("hg-wave-chart", "hg-tooltip-wave", wave.state, "m", 1);
+
+  const bruns = buildMiniChart(helgolandCache.brunsWindSeries, cssVar('--chart-forecast'), "kn", HALUNDER_WIND_LIMIT_KN, `${HALUNDER_WIND_LIMIT_KN} kn · Brunsbüttel wird nicht angefahren`);
+  document.getElementById("hg-bruns-chart").innerHTML = bruns.svg;
+  attachMiniHover("hg-bruns-chart", "hg-tooltip-bruns", bruns.state, "kn", 0);
+}
+
+async function loadHelgoland(){
+  const errBox = document.getElementById("hg-err");
+  errBox.style.display = "none";
+  try{
+    const windUrl = `https://api.open-meteo.com/v1/forecast?latitude=${HELGOLAND.lat}&longitude=${HELGOLAND.lon}&current=wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=wind_speed_10m&wind_speed_unit=kn&forecast_days=2&timezone=Europe%2FBerlin`;
+    const waveUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${HELGOLAND.lat}&longitude=${HELGOLAND.lon}&current=wave_height&hourly=wave_height&forecast_days=2&timezone=Europe%2FBerlin`;
+    const brunsUrl = `https://api.open-meteo.com/v1/forecast?latitude=${BRUNSBUETTEL.lat}&longitude=${BRUNSBUETTEL.lon}&current=wind_speed_10m,wind_gusts_10m&hourly=wind_speed_10m&wind_speed_unit=kn&forecast_days=2&timezone=Europe%2FBerlin`;
+
+    const [windRes, waveRes, brunsRes] = await Promise.all([fetch(windUrl), fetch(waveUrl), fetch(brunsUrl)]);
+    if(!windRes.ok) throw new Error("Wind-Vorhersage Helgoland: HTTP " + windRes.status);
+    if(!waveRes.ok) throw new Error("Wellen-Vorhersage: HTTP " + waveRes.status);
+    if(!brunsRes.ok) throw new Error("Wind-Vorhersage Brunsbüttel: HTTP " + brunsRes.status);
+    const wind = await windRes.json();
+    const wave = await waveRes.json();
+    const bruns = await brunsRes.json();
+
+    const cur = wind.current || {};
+    document.getElementById("hg-wind").classList.remove("skeleton");
+    document.getElementById("hg-wind").innerHTML = `${Math.round(cur.wind_speed_10m ?? 0)} <span class="unit">kn</span>`;
+    document.getElementById("hg-gusts").classList.remove("skeleton");
+    document.getElementById("hg-gusts").innerHTML = `${Math.round(cur.wind_gusts_10m ?? 0)} <span class="unit">kn</span>`;
+    document.getElementById("hg-dir").classList.remove("skeleton");
+    document.getElementById("hg-dir").innerHTML = `${Math.round(cur.wind_direction_10m ?? 0)} <span class="unit">°</span>`;
+
+    const waveCur = (wave.current && wave.current.wave_height);
+    document.getElementById("hg-wave").classList.remove("skeleton");
+    document.getElementById("hg-wave").innerHTML = `${(waveCur ?? 0).toLocaleString("de-DE", {maximumFractionDigits:1})} <span class="unit">m</span>`;
+
+    const brunsCur = bruns.current || {};
+    document.getElementById("hg-wind-bruns").classList.remove("skeleton");
+    document.getElementById("hg-wind-bruns").innerHTML = `${Math.round(brunsCur.wind_speed_10m ?? 0)} <span class="unit">kn</span>`;
+    document.getElementById("hg-gusts-bruns").classList.remove("skeleton");
+    document.getElementById("hg-gusts-bruns").innerHTML = `${Math.round(brunsCur.wind_gusts_10m ?? 0)} <span class="unit">kn</span>`;
+
+    document.getElementById("hg-meta").innerHTML =
+      `Letzte Aktualisierung: <b>${fmtTime(cur.time || new Date().toISOString())}</b> Uhr`;
+
+    const windSeries = (wind.hourly && wind.hourly.time || []).map((t,i) => ({ timestamp: t, value: wind.hourly.wind_speed_10m[i] }));
+    const waveSeries = (wave.hourly && wave.hourly.time || []).map((t,i) => ({ timestamp: t, value: wave.hourly.wave_height[i] }));
+    const brunsWindSeries = (bruns.hourly && bruns.hourly.time || []).map((t,i) => ({ timestamp: t, value: bruns.hourly.wind_speed_10m[i] }));
+
+    helgolandCache = { windSeries, waveSeries, brunsWindSeries };
+    renderHelgolandVisuals();
+  }catch(err){
+    console.error(err);
+    errBox.style.display = "block";
+    errBox.textContent = "Wind-/Wellendaten für Helgoland/Brunsbüttel konnten nicht geladen werden.";
+  }
+}
+
+// representative points across the Rhine catchment south of Mainz —
+// rain falling here eventually reaches Mainz / Oestrich / Kaub downstream
+const PRECIP_REGIONS = [
+  { name: "Hochrhein",            place: "Basel",          lat: 47.5596, lon: 7.5886 },
+  { name: "Oberrhein",            place: "Karlsruhe",       lat: 49.0069, lon: 8.4037 },
+  { name: "Neckar-Einzugsgebiet", place: "Stuttgart",       lat: 48.7758, lon: 9.1829 },
+  { name: "Main-Einzugsgebiet",   place: "Frankfurt a. M.", lat: 50.1109, lon: 8.6821 },
+  { name: "Nahe",                 place: "Bad Kreuznach",   lat: 49.8477, lon: 7.8672 },
+  { name: "Pfälzerwald",          place: "Kaiserslautern",  lat: 49.4401, lon: 7.7491 },
+  { name: "Rheinhessen",          place: "Mainz-Umland",    lat: 49.9500, lon: 8.1500 }
+];
+const precipGrid = document.getElementById("precipGrid");
+
+PRECIP_REGIONS.forEach(r => {
+  const card = document.createElement("div");
+  card.className = "precip-card";
+  card.id = "precip-" + r.name;
+  card.innerHTML = `
+    <div>
+      <div class="precip-region">${r.name}</div>
+      <div class="precip-place">${r.place}</div>
+    </div>
+    <div class="precip-bars">
+      <div class="precip-bar-col">
+        <div class="precip-bar-track"><div class="precip-bar" id="bar-today-${r.name}" style="height:2px; background:var(--mid-grey);"></div></div>
+        <span class="precip-bar-value" id="val-today-${r.name}">—</span>
+        <span class="precip-bar-label">HEUTE</span>
+      </div>
+      <div class="precip-bar-col">
+        <div class="precip-bar-track"><div class="precip-bar" id="bar-tomorrow-${r.name}" style="height:2px; background:var(--mid-grey);"></div></div>
+        <span class="precip-bar-value" id="val-tomorrow-${r.name}">—</span>
+        <span class="precip-bar-label">MORGEN</span>
+      </div>
+    </div>
+  `;
+  precipGrid.appendChild(card);
+});
+
+function precipColor(mm){
+  if(mm >= 8) return cssVar('--frs-red');    // kräftiger Regen
+  if(mm >= 2) return cssVar('--mid-blue');   // mäßiger Regen
+  if(mm > 0)  return cssVar('--light-blue'); // leichter Regen
+  return cssVar('--mid-grey');               // trocken
+}
+
+async function fetchPrecip(region){
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&daily=precipitation_sum&timezone=Europe%2FBerlin&forecast_days=2`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("Niederschlag " + region.name + ": HTTP " + res.status);
+  const data = await res.json();
+  const sums = (data.daily && data.daily.precipitation_sum) || [];
+  return { today: sums[0], tomorrow: sums[1] };
+}
+
+async function loadPrecipRegion(region){
+  try{
+    const { today, tomorrow } = await fetchPrecip(region);
+    const maxBarPx = 52;
+    // scale bars against a fixed 20mm reference so intensity is comparable across refreshes
+    const scale = mm => Math.max(2, Math.min(maxBarPx, ((mm || 0) / 20) * maxBarPx));
+
+    const barToday = document.getElementById("bar-today-" + region.name);
+    const barTomorrow = document.getElementById("bar-tomorrow-" + region.name);
+    const valToday = document.getElementById("val-today-" + region.name);
+    const valTomorrow = document.getElementById("val-tomorrow-" + region.name);
+
+    if(typeof today === "number"){
+      barToday.style.height = scale(today) + "px";
+      barToday.style.background = precipColor(today);
+      valToday.textContent = today.toLocaleString("de-DE", {maximumFractionDigits:1}) + " mm";
+    }
+    if(typeof tomorrow === "number"){
+      barTomorrow.style.height = scale(tomorrow) + "px";
+      barTomorrow.style.background = precipColor(tomorrow);
+      valTomorrow.textContent = tomorrow.toLocaleString("de-DE", {maximumFractionDigits:1}) + " mm";
+    }
+  }catch(e){
+    console.error(e);
+    const el = document.getElementById("precip-" + region.name);
+    if(el) el.style.opacity = "0.5";
+  }
+}
+
+async function loadPrecipAll(){
+  await Promise.all(PRECIP_REGIONS.map(loadPrecipRegion));
+}
+
+async function loadAll(){
+  statusBox.classList.remove("error");
+  statusText.textContent = "aktualisiere…";
+  try{
+    await Promise.all([...STATIONS.map(loadStation), loadPrecipAll(), loadHelgoland(), loadHavneby()]);
+    await loadGlueckstadtTide();
+    statusText.textContent = "aktuell · " + new Date().toLocaleTimeString("de-DE", {hour:"2-digit", minute:"2-digit"}) + " Uhr";
+  }catch(e){
+    statusBox.classList.add("error");
+    statusText.textContent = "Fehler beim Laden";
+  }
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadAll);
+loadAll();
+setInterval(loadAll, REFRESH_MS);
+</script>
+</body>
+</html>
