@@ -731,9 +731,6 @@ function buildSettingsPanel(){
   });
 }
 buildSettingsPanel();
-STATIONS.forEach(s => applyVisibility(s.id));
-applyVisibility("HAVNEBY");
-applyVisibility("HELGOLAND");
 
 settingsToggle.addEventListener("click", (e) => {
   e.stopPropagation();
@@ -863,6 +860,14 @@ STATIONS.forEach(s => {
   `;
   grid.appendChild(card);
 }
+
+// erst hier anwenden: Stations- und Havneby-Karten existieren jetzt im DOM.
+// Vorher lief der Aufruf ins Leere (getElementById fand die Karte noch nicht),
+// wodurch eine gespeicherte "ausgeblendet"-Einstellung nach einem Reload erst
+// nach zweimaligem Toggle tatsächlich griff.
+STATIONS.forEach(s => applyVisibility(s.id));
+applyVisibility("HAVNEBY");
+applyVisibility("HELGOLAND");
 
 function fmtTime(iso){
   try{
